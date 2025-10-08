@@ -1,4 +1,4 @@
-package com.yoad.arkanoid.notifiers;
+package com.yoad.arkanoid.events;
 
 /**
  * The HitNotifier interface should be implemented by objects that can be hit and want to notify

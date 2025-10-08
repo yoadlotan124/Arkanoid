@@ -2,7 +2,7 @@ package com.yoad.arkanoid.sprites;
 
 import biuoop.DrawSurface;
 import com.yoad.arkanoid.game.Game;
-import com.yoad.arkanoid.notifiers.Counter;
+import com.yoad.arkanoid.events.Counter;
 import java.awt.Color;
 
 /**

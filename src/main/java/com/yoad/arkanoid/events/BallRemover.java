@@ -1,4 +1,4 @@
-package com.yoad.arkanoid.notifiers;
+package com.yoad.arkanoid.events;
 
 import com.yoad.arkanoid.game.Block;
 import com.yoad.arkanoid.game.Game;
