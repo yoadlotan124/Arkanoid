@@ -30,4 +30,4 @@ Built as part of my university OOP course and later refactored for clean archite
 ## 🖥️ How to Run
 1. Clone this repository  
    ```bash
-   git clone https://github.com/<your-username>/Arkanoid.git
+   git clone https://github.com/<yoadlotan124>/Arkanoid.git
