@@ -1,34 +1,32 @@
 # Arkanoid (Java)
 
 A modern, object-oriented Java recreation of the classic **Arkanoid / Breakout** arcade game.  
-Built as part of my university OOP course and later refactored for clean architecture, physics accuracy, and gameplay polish.
+Originally built for a university OOP course; now being refactored for cleaner architecture, accurate physics, and future features.
 
 ## 🎮 Features
-- 🧱 **Fully functional gameplay** — control a paddle to bounce the ball and destroy bricks.
-- ⚙️ **Physics engine** — realistic ball reflection, angle-based control from paddle hits.
-- 💥 **Collision system** — handles multiple bricks, edges, and corner cases with precision.
-- 🧩 **Object-Oriented Design** — clean class hierarchy for entities, game state, and levels.
-- ⏱️ **Smooth frame timing** — consistent movement using a fixed update rate.
-- 🌈 **Expandable architecture** — ready for power-ups, multiple levels, or scoring systems.
+- Paddle + ball gameplay with brick destruction
+- Deterministic timing (fixed-timestep update loop)
+- Precise collision handling (ball vs walls, paddle, bricks)
+- Clean OOP design (`Game`, `Ball`, `Paddle`, `Brick`, `Physics`, `Renderer`)
+- Easy to extend (levels, power-ups, HUD, sounds)
 
-## 🧠 Technical Highlights
-- Implemented in **pure Java**, no external game engines.
-- Designed around **composition and inheritance** for clean extensibility.
-- Collision handled via **axis-aligned bounding boxes (AABB)** and reflection vectors.
-- Clear separation of concerns:
-  - `Game` — main loop and state management  
-  - `Ball`, `Paddle`, `Brick` — independent entities  
-  - `Physics` — movement and collision logic  
-  - `Renderer` — handles display and refresh  
+## 🧠 Tech Highlights
+- Pure Java — no external game engine
+- Collision via AABB + reflection (moving circle vs rectangles)
+- Separation of concerns: game loop, physics, rendering, input
+- Build scripts included (`build.xml`), or compile with `javac`
 
-## 🚀 Future Improvements
-- Power-ups (multi-ball, expand paddle, slow motion)
-- Level loader (JSON or text-based)
-- Particle and sound effects
-- Score tracking and HUD
+## 🚀 Run locally
 
-## 🖥️ How to Run
-1. Clone this repository  
-   ```bash
-   git clone https://github.com/<yoadlotan124>/Arkanoid.git
->>>>>>> 660535b69f7a610e9f75def4187b781e66dd3350
+### Option A — Compile/Run with `javac` (no IDE)
+```bash
+git clone https://github.com/yoadlotan124/Arkanoid.git
+cd Arkanoid
+# If using the provided BIU jar for current GUI (temporary):
+# Windows (PowerShell/cmd):
+javac -cp lib/biuoop-1.4.jar -d out src/**/*.java
+java -cp "out;lib/biuoop-1.4.jar" your.main.package.Main
+
+# macOS/Linux:
+javac -cp lib/biuoop-1.4.jar -d out $(find src -name "*.java")
+java -cp "out:lib/biuoop-1.4.jar" your.main.package.Main
