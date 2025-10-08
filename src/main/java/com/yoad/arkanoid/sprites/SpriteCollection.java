@@ -1,6 +1,7 @@
 package com.yoad.arkanoid.sprites;
 
-import biuoop.DrawSurface;
+import javafx.scene.canvas.GraphicsContext;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,15 +13,7 @@ import java.util.List;
 public class SpriteCollection {
 
   // Fields
-  private List<Sprite> sprites;
-
-  /**
-   * Constructs an empty {@code sprites.SpriteCollection}. Initializes the list to store {@link
-   * Sprite} objects.
-   */
-  public SpriteCollection() {
-    this.sprites = new ArrayList<>();
-  }
+  private final List<Sprite> sprites = new ArrayList<>();
 
   /**
    * Adds a sprite to the collection.
@@ -30,6 +23,15 @@ public class SpriteCollection {
    */
   public void addSprite(Sprite s) {
     this.sprites.add(s);
+  }
+
+  /**
+   * Removes a sprite from the collection.
+   *
+   * @param s the {@link Sprite} to be removed from the collection.
+   */
+  public void removeSprite(Sprite s) {
+     sprites.remove(s); 
   }
 
   /**
@@ -60,9 +62,9 @@ public class SpriteCollection {
    * @param d the {@link DrawSurface} on which the sprites will be drawn. This surface is where the
    *     graphical elements will be rendered.
    */
-  public void drawAllOn(DrawSurface d) {
-    for (Sprite s : this.sprites) {
-      s.drawOn(d);
+  public void drawAll(GraphicsContext g) {
+        for (Sprite s : new ArrayList<>(sprites)) {
+            s.draw(g);
+        }
     }
-  }
 }

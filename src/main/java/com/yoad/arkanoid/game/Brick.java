@@ -5,8 +5,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import biuoop.DrawSurface;
-
 import com.yoad.arkanoid.events.HitListener;
 import com.yoad.arkanoid.events.HitNotifier;
 import com.yoad.arkanoid.geometry.Point;
@@ -14,6 +12,7 @@ import com.yoad.arkanoid.geometry.Rectangle;
 import com.yoad.arkanoid.geometry.Velocity;
 import com.yoad.arkanoid.physics.Collidable;
 import com.yoad.arkanoid.sprites.Sprite;
+import com.yoad.arkanoid.fx.FxColors;
 
 /**
  * represents a class for our game blocks that will be rectangles.
@@ -53,12 +52,12 @@ public class Brick implements Collidable, Sprite, HitNotifier {
      * @param surface the DrawSurface on which the block will be drawn
      */
     @Override
-    public void drawOn(DrawSurface surface) {
+    public void draw(javafx.scene.canvas.GraphicsContext g) {
         Rectangle r = this.getCollisionRectangle();
-        surface.setColor(color);
-        surface.fillRectangle(r.getStartX(), r.getStartY(), r.getWidth(), r.getHeight());
-        surface.setColor(Color.BLACK);
-        surface.drawRectangle(r.getStartX(), r.getStartY(), r.getWidth(), r.getHeight());
+        g.setFill(FxColors.toFx(this.color));
+        g.fillRect(r.getStartX(), r.getStartY(), r.getWidth(), r.getHeight());
+        g.setStroke(javafx.scene.paint.Color.BLACK);
+        g.strokeRect(r.getStartX(), r.getStartY(), r.getWidth(), r.getHeight());
     }
 
     /**

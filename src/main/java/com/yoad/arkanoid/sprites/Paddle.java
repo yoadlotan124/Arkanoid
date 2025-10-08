@@ -1,14 +1,13 @@
 package com.yoad.arkanoid.sprites;
-import com.yoad.arkanoid.game.ArkanoidGame;
 
-import biuoop.DrawSurface;
-import biuoop.KeyboardSensor;
+import com.yoad.arkanoid.game.ArkanoidGame;
 import com.yoad.arkanoid.geometry.Point;
 import com.yoad.arkanoid.geometry.Rectangle;
 import com.yoad.arkanoid.geometry.Velocity;
 import com.yoad.arkanoid.physics.Collidable;
 
-import java.awt.Color;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 /**
  * The sprites.Paddle class represents a paddle in the game.
@@ -18,24 +17,36 @@ import java.awt.Color;
  * The paddle is a rectangular object, and its behavior is dependent on the region where the ball hits it.
  */
 public class Paddle implements Sprite, Collidable {
-    private biuoop.KeyboardSensor keyboard;
+
     private Rectangle rectangle;
+
+    // Input flags (fed each frame by ArkanoidGame)
+    private boolean leftPressed = false;
+    private boolean rightPressed = false;
+
+    // Movement tuning
+    private static final int SPEED = 6;
 
     /**
      * Constructs a new sprites.Paddle object with a specified rectangle.
      * @param rectangle The rectangle that represents the paddle's shape and size.
      * @param keyboard
      */
-    public Paddle(Rectangle rectangle, biuoop.KeyboardSensor keyboard) {
+    public Paddle(Rectangle rectangle) {
         this.rectangle = rectangle;
-        this.keyboard = keyboard;
+    }
+
+    /** Let the game feed input state each frame (e.g., from JavaFX key handlers). */
+    public void setInput(boolean left, boolean right) {
+        this.leftPressed = left;
+        this.rightPressed = right;
     }
 
     /**
      * Moves the paddle to the left by 5 units.
      */
     public void moveLeft() {
-        rectangle.move(-6);
+        rectangle.move(-SPEED);
         if (rectangle.getStartX() <= -50) {
             rectangle.move(862);
         }
@@ -45,7 +56,7 @@ public class Paddle implements Sprite, Collidable {
      * Moves the paddle to the right by 5 units.
      */
     public void moveRight() {
-        rectangle.move(6);
+        rectangle.move(SPEED);
         if (rectangle.getStartX() >= 760) {
             rectangle.move(-862);
         }
@@ -57,13 +68,8 @@ public class Paddle implements Sprite, Collidable {
      */
     @Override
     public void timePassed() {
-        // Check for key presses and perform actions accordingly
-        if (keyboard.isPressed(KeyboardSensor.LEFT_KEY)) {
-            moveLeft();  // Move paddle left
-        }
-        if (keyboard.isPressed(KeyboardSensor.RIGHT_KEY)) {
-            moveRight();  // Move paddle right
-        }
+        if (leftPressed)  moveLeft();
+        if (rightPressed) moveRight();
     }
 
     /**
@@ -71,12 +77,12 @@ public class Paddle implements Sprite, Collidable {
      * @param surface The surface to draw on.
      */
     @Override
-    public void drawOn(DrawSurface surface) {
+    public void draw(GraphicsContext g) {
         Rectangle r = this.getCollisionRectangle();
-        surface.setColor(Color.ORANGE);
-        surface.fillRectangle(r.getStartX(), r.getStartY(), r.getWidth(), r.getHeight());
-        surface.setColor(Color.BLACK);
-        surface.drawRectangle(r.getStartX() - 1, r.getStartY() - 1, r.getWidth() + 1, r.getHeight() + 2);
+        g.setFill(Color.ORANGE);
+        g.fillRect(r.getStartX(), r.getStartY(), r.getWidth(), r.getHeight());
+        g.setStroke(Color.BLACK);
+        g.strokeRect(r.getStartX() - 1, r.getStartY() - 1, r.getWidth() + 1, r.getHeight() + 2);
     }
 
     /**

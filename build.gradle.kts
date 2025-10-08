@@ -1,37 +1,39 @@
+import org.gradle.api.tasks.JavaExec
+
 plugins {
     application
     java
+    id("org.openjfx.javafxplugin") version "0.1.0"
 }
 
 java {
-    // use your installed JDK, but compile/target Java 17 bytecode
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
 }
+tasks.withType(JavaCompile::class) { options.release.set(17) }
 
-repositories {
-    mavenCentral()
-}
+repositories { mavenCentral() }
 
 dependencies {
-    implementation(files("lib/biuoop-1.4.jar"))
-
-    // JUnit 5 + launcher so Gradle test executor can boot
+    // JUnit (unchanged)
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.3")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.11.3")
 }
 
+javafx {
+    version = "17.0.16"          // pairs with Java 17 (LTS)
+    modules("javafx.controls", "javafx.graphics")
+}
+
 application {
     mainClass.set("com.yoad.arkanoid.App")
-    applicationDefaultJvmArgs = listOf("-Xms128m", "-Xmx512m")
-    applicationName = "arkanoid"
 }
 
-tasks.test {
-    useJUnitPlatform()
+tasks.test { 
+    useJUnitPlatform() 
 }
 
-// ensure correct stdlib targeting with newer JDKs
-tasks.withType(JavaCompile::class) {
-    options.release.set(17)
+tasks.named<JavaExec>("run") {
+    notCompatibleWithConfigurationCache("JavaFX run task touches SourceSetContainer via plugin")
 }
+

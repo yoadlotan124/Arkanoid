@@ -1,6 +1,6 @@
 package com.yoad.arkanoid.sprites;
 
-import biuoop.DrawSurface;
+import javafx.scene.canvas.GraphicsContext;
 
 /**
  * The {@code sprites.Sprite} interface defines the common behavior for any object that can be drawn
@@ -14,7 +14,7 @@ public interface Sprite {
    * @param d the {@link DrawSurface} on which the sprite will be drawn. This object is used to
    *     display graphical elements.
    */
-  void drawOn(DrawSurface d);
+  void draw(GraphicsContext g);
 
   /**
    * Notifies the sprite that a certain amount of time has passed. This method can be used to update

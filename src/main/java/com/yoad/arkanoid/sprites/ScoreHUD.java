@@ -1,11 +1,12 @@
 package com.yoad.arkanoid.sprites;
 
-import biuoop.DrawSurface;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 import com.yoad.arkanoid.events.Counter;
 import com.yoad.arkanoid.game.ArkanoidGame;
 
-import java.awt.Color;
 
 /**
  * A {@code ScoreIndicator} is a {@link Sprite} that displays the current score
@@ -29,9 +30,10 @@ public class ScoreHUD implements Sprite {
      * @param d the DrawSurface to draw on
      */
     @Override
-    public void drawOn(DrawSurface d) {
-        d.setColor(Color.WHITE);
-        d.drawText(350, 60, "Score: " + currentScore.getValue(), 18);
+    public void draw(GraphicsContext g) {
+        g.setFill(Color.WHITE);
+        g.setFont(Font.font(18));
+        g.fillText("Score: " + currentScore.getValue(), 350, 60);
     }
 
     /**

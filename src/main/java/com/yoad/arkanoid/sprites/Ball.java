@@ -2,12 +2,13 @@ package com.yoad.arkanoid.sprites;
 import com.yoad.arkanoid.game.World;
 import com.yoad.arkanoid.game.ArkanoidGame;
 
-import biuoop.DrawSurface;
+import javafx.scene.canvas.GraphicsContext;
 import com.yoad.arkanoid.geometry.Line;
 import com.yoad.arkanoid.geometry.Point;
 import com.yoad.arkanoid.geometry.Rectangle;
 import com.yoad.arkanoid.geometry.Velocity;
 import com.yoad.arkanoid.physics.CollisionInfo;
+import com.yoad.arkanoid.fx.FxColors;
 
 import java.awt.Color;
 import java.util.Random;
@@ -81,9 +82,12 @@ public class Ball implements Sprite {
      * @param surface the DrawSurface on which to draw the ball
      */
     @Override
-    public void drawOn(DrawSurface surface) {
-        surface.setColor(this.color);
-        surface.fillCircle(getX(), getY(), getSize());
+    public void draw(GraphicsContext g) {
+        g.setFill(FxColors.toFx(this.color));
+        double d = this.radius * 2.0;
+        g.fillOval(this.center.getX() - this.radius,
+            this.center.getY() - this.radius,
+            d, d);
     }
 
     /**

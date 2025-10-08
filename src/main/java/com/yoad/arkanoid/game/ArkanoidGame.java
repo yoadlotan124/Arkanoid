@@ -1,9 +1,5 @@
 package com.yoad.arkanoid.game;
 
-import biuoop.GUI;
-import biuoop.DrawSurface;
-import biuoop.Sleeper;
-
 import com.yoad.arkanoid.events.BallRemover;
 import com.yoad.arkanoid.events.BlockRemover;
 import com.yoad.arkanoid.events.Counter;
@@ -17,46 +13,214 @@ import com.yoad.arkanoid.sprites.ScoreHUD;
 import com.yoad.arkanoid.sprites.Sprite;
 import com.yoad.arkanoid.sprites.SpriteCollection;
 
-import java.awt.Color;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.input.KeyCode;
 
-
-import java.awt.Image;
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.io.File;
+import java.util.Objects;
 
 /**
- * The game.Game class is responsible for managing the game logic, including the creation and update of sprites,
+ * The game.ArkanoidGame class is responsible for managing the game logic, including the creation and update of sprites,
  * handling game environment interactions, and managing the game loop for rendering and timing.
  */
 public class ArkanoidGame {
 
-    private SpriteCollection sprites;
-    private World environment;
-    private GUI gui;
-    private DrawSurface d;
-    private Sleeper sleeper;
-    private Counter blockCounter;
-    private Counter ballCounter;
-    private BlockRemover blockRemover;
-    private BallRemover ballRemover;
-    private Counter score;
-    private ScoreTrackingListener scoreTracker;
+    //Screen size
+    public static final int WIDTH = 800;
+    public static final int HEIGHT = 600;
+
+    private final SpriteCollection sprites = new SpriteCollection();
+    private final World environment = new World();
+
+    // Primary controllable entities
+    private Paddle paddle;
+
+    // Input (fed from JavaFX Scene events)
+    private volatile boolean keyLeft  = false;
+    private volatile boolean keyRight = false;
+    private volatile boolean keySpace = false; // kept for future use
+    private volatile boolean keyEsc   = false; // kept for future use
+    private volatile boolean keyEnter = false; // kept for future/menu use
+
+    // Game accounting
+    private final Counter blockCounter = new Counter();
+    private final Counter ballCounter  = new Counter();
+    private final Counter score        = new Counter();
+
+    private final BlockRemover blockRemover = new BlockRemover(this, blockCounter, score);
+    private final BallRemover  ballRemover  = new BallRemover(this, ballCounter);
+    private final ScoreTrackingListener scoreTracker = new ScoreTrackingListener(score);
+
+    // End state
+    private boolean finished = false;
+    private String endMessage = "";
 
     /**
-     * Constructs a new game.Game object. Initializes the sprite collection and game environment.
+     * Initializes the game by setting up the graphical user interface (GUI),
+     * creating the ball and blocks (as sprites and collidables), and adding them to the game.
+     * A simple grid of blocks is created for the game, and the ball is set up with an initial position and velocity.
      */
-    public ArkanoidGame() {
-        sprites = new SpriteCollection();
-        environment = new World();
-        blockCounter = new Counter();
-        score = new Counter();
-        ballCounter = new Counter();
-        blockRemover = new BlockRemover(this, blockCounter, score);
-        ballRemover = new BallRemover(this, ballCounter);
-        scoreTracker = new ScoreTrackingListener(score);
+    public void initialize() {
+        // HUD
+        new ScoreHUD(score).addToGame(this);
+
+        // Paddle
+        Rectangle r = new Rectangle(357, 576, 94, 12);
+        paddle = new Paddle(r);
+        paddle.addToGame(this);
+
+        // Balls
+        int radius = 6;
+        Ball ball1 = new Ball(new Point(200, 400), radius, java.awt.Color.WHITE, this.environment);
+        ball1.setVelocity(3, -3);
+        ball1.addToGame(this);
+
+        Ball ball2 = new Ball(new Point(400, 420), radius, java.awt.Color.WHITE, this.environment);
+        ball2.setVelocity(-3, -3);
+        ball2.addToGame(this);
+
+        Ball ball3 = new Ball(new Point(600, 410), radius, java.awt.Color.WHITE, this.environment);
+        ball3.setVelocity(3, -3);
+        ball3.addToGame(this);
+
+        ballCounter.increase(3);
+
+        // Bricks (grid)
+        int blockWidth = 49;
+        int blockHeight = 23;
+        int rows = 6;
+        int cols = 12;
+
+        java.awt.Color[] colors = {
+            java.awt.Color.MAGENTA, java.awt.Color.RED, java.awt.Color.YELLOW,
+            java.awt.Color.CYAN,    java.awt.Color.PINK, java.awt.Color.GREEN
+        };
+
+        for (int row = 0; row < rows; row++) {
+            java.awt.Color currentColor = colors[row % colors.length];
+            for (int col = 0; col < cols; col++) {
+                int x = 723 - col * 49;
+                int y = 150 + row * 23;
+                Brick block = new Brick(new Rectangle(new Point(x, y), blockWidth, blockHeight), currentColor);
+                block.addToGame(this);
+                blockCounter.increase(1);
+                block.addHitListener(blockRemover);
+                block.addHitListener(scoreTracker);
+            }
+            cols--; // shrinking row
+        }
+
+        // Walls (top/left/right) + bottom (death)
+        Brick block1 = new Brick(new Rectangle(new Point(0, 0), 800, 28), java.awt.Color.GRAY);
+        block1.addToGame(this);
+        Brick block2 = new Brick(new Rectangle(new Point(0, 28), 28, 772), java.awt.Color.GRAY);
+        block2.addToGame(this);
+        Brick block3 = new Brick(new Rectangle(new Point(772, 28), 28, 772), java.awt.Color.GRAY);
+        block3.addToGame(this);
+        Brick block4 = new Brick(new Rectangle(new Point(28, 600), 744, 28), java.awt.Color.GRAY);
+        block4.addHitListener(ballRemover);
+        block4.addToGame(this);
     }
+
+    // ---------------- Input from JavaFX ----------------
+
+    /** Called by FxLauncher: scene.setOnKeyPressed/Released → onKeyChanged(code, down) */
+    public void onKeyChanged(KeyCode code, boolean down) {
+        if (code == null) return;
+        switch (code) {
+            case LEFT, A   -> keyLeft  = down;
+            case RIGHT, D  -> keyRight = down;
+            case SPACE     -> keySpace = down;
+            case ESCAPE    -> keyEsc   = down;
+            case ENTER     -> keyEnter = down;
+            default -> { /* ignore other keys */ }
+        }
+    }
+
+    // ---------------- Per-frame update & render ----------------
+
+    /**
+     * Called every frame by the FX AnimationTimer.
+     * @param g  GraphicsContext for drawing this frame
+     * @param dt Seconds since last frame (you can use it to scale movement if you wish)
+     */
+    public void tick(GraphicsContext g, double dt) {
+        if (finished) {
+            drawBackground(g);
+            drawEndOverlay(g);
+            return;
+        }
+
+        // Feed input to the paddle before updating sprites
+        if (paddle != null) {
+            paddle.setInput(keyLeft, keyRight);
+        }
+
+        // UPDATE
+        sprites.notifyAllTimePassed(); // your existing per-tick updates
+
+        // Check end conditions
+        if (blockCounter.getValue() <= 0) {
+            finished = true;
+            endMessage = "You Win!\nScore: " + score.getValue();
+        } else if (ballCounter.getValue() <= 0) {
+            finished = true;
+            endMessage = "Game Over\nScore: " + score.getValue();
+        }
+
+        // DRAW
+        drawBackground(g);
+        sprites.drawAll(g);
+
+        // (Optional) overlay debug text or HUD extensions here
+    }
+
+    private void drawBackground(GraphicsContext g) {
+        g.setFill(Color.BLUE);
+        g.fillRect(0, 0, WIDTH, HEIGHT);
+    }
+
+    private void drawEndOverlay(GraphicsContext g) {
+        g.setFill(Color.color(0, 0, 0, 0.55));
+        g.fillRect(0, 0, WIDTH, HEIGHT);
+
+        g.setFill(Color.WHITE);
+        g.setFont(Font.font(28));
+        String msg = Objects.requireNonNullElse(endMessage, "");
+        double y = HEIGHT / 2.0 - 10;
+        for (String line : msg.split("\\n")) {
+            double w = textWidth(g, line);
+            g.fillText(line, (WIDTH - w) / 2.0, y);
+            y += 36;
+        }
+        g.setFont(Font.font(18));
+        g.fillText("Press ENTER to restart", WIDTH / 2.0 - 110, y + 10);
+
+        // Simple restart on ENTER (re-init world)
+        if (keyEnter) {
+            restart();
+        }
+    }
+
+    private void restart() {
+        // Clear collections
+        sprites.getSprites().clear();
+        environment.getCollidables().clear();
+        finished = false;
+        endMessage = "";
+
+        // Reset counters
+        blockCounter.decrease(blockCounter.getValue());
+        ballCounter.decrease(ballCounter.getValue());
+        score.decrease(score.getValue());
+
+        // Rebuild world
+        initialize();
+    }
+
+    // ---------------- Game interface (used by listeners & sprites) ----------------
 
     /**
      * Adds a collidable object to the game environment.
@@ -77,77 +241,6 @@ public class ArkanoidGame {
     }
 
     /**
-     * Initializes the game by setting up the graphical user interface (GUI),
-     * creating the ball and blocks (as sprites and collidables), and adding them to the game.
-     * A simple grid of blocks is created for the game, and the ball is set up with an initial position and velocity.
-     */
-    public void initialize() {
-        // Set up GUI and sleeper for frame timing
-        gui = new GUI("game.Game", 800, 600);
-        sleeper = new Sleeper();
-
-        ScoreHUD scoreIndicator = new ScoreHUD(score);
-        scoreIndicator.addToGame(this);
-
-        Rectangle r = new Rectangle(357, 576, 94, 12);
-        Paddle paddle = new Paddle(r, gui.getKeyboardSensor());
-        paddle.addToGame(this);
-
-        // Create and configure the sprites.Ball
-        // Ball radius
-        int radius = 6;
-
-        // Ball positions (below the grid, not inside any blocks)
-        Ball ball1 = new Ball(new Point(200, 400), radius, Color.WHITE, this.environment);
-        ball1.setVelocity(3, -3);
-        ball1.addToGame(this);
-
-        Ball ball2 = new Ball(new Point(400, 420), radius, Color.WHITE, this.environment);
-        ball2.setVelocity(-3, -3);
-        ball2.addToGame(this);
-
-        Ball ball3 = new Ball(new Point(600, 410), radius, Color.WHITE, this.environment);
-        ball3.setVelocity(3, -3);
-        ball3.addToGame(this);
-
-            // Update the counter
-        ballCounter.increase(3);
-
-        // Create and add Blocks to the game (in a grid pattern)
-        int blockWidth = 49;
-        int blockHeight = 23;
-        int rows = 6;
-        int cols = 12;
-
-        Color[] colors = {Color.MAGENTA, Color.RED, Color.YELLOW, Color.CYAN, Color.PINK, Color.GREEN};
-
-        for (int row = 0; row < rows; row++) {
-            Color currentColor = colors[row % colors.length]; // Cycle colors if needed
-            for (int col = 0; col < cols; col++) {
-                int x = 723 - col * 49;  // X position with margin
-                int y = 150 + row * 23; // Y position with margin
-                Brick block = new Brick(new Rectangle(new Point(x, y), blockWidth, blockHeight), currentColor);
-                block.addToGame(this);  // Add each block to the game
-                blockCounter.increase(1);
-                block.addHitListener(blockRemover);
-                block.addHitListener(scoreTracker);
-            }
-            cols--; // Shrinking the number of blocks each row
-        }
-
-        Brick block1 = new Brick(new Rectangle(new Point(0, 0), 800, 28), Color.GRAY);
-        block1.addToGame(this);
-        Brick block2 = new Brick(new Rectangle(new Point(0, 28), 28, 772), Color.GRAY);
-        block2.addToGame(this);
-        Brick block3 = new Brick(new Rectangle(new Point(772, 28), 28, 772), Color.GRAY);
-        block3.addToGame(this);
-        Brick block4 = new Brick(new Rectangle(new Point(28, 600), 744, 28), Color.GRAY);
-        block4.addHitListener(ballRemover);
-        block4.addToGame(this);
-
-    }
-
-    /**
      * removes block from the list.
      * @param c removes c
      */
@@ -160,84 +253,34 @@ public class ArkanoidGame {
      * @param s removes s
      */
     public void removeSprite(Sprite s) {
-        this.sprites.getSprites().remove(s);
+        this.sprites.removeSprite(s);
     }
 
-    /**
-     * Runs the game by starting the animation loop. This method continuously updates the game state
-     * (calls timePassed on all sprites), draws the game, and sleeps for the appropriate time to maintain
-     * the specified frames per second (FPS).
-     */
-    public void run() {
-        int framesPerSecond = 60;
-        int millisecondsPerFrame = 1000 / framesPerSecond;
-        while (blockCounter.getValue() > 0 && ballCounter.getValue() > 0) {
-            long startTime = System.currentTimeMillis(); // Timing for frame duration
+    // ---------------- Helpers for FxLauncher ----------------
 
-            // Notify all sprites that time has passed
-            this.sprites.notifyAllTimePassed();
-
-            // Get the draw surface and render all sprites
-            DrawSurface d = gui.getDrawSurface();
-            d.setColor(Color.BLUE);
-            d.fillRectangle(0, 0, 800, 600);
-
-            this.sprites.drawAllOn(d);  // Draw all sprites on the surface
-            gui.show(d);                // Display the surface
-
-            // Timing control: Sleep to maintain FPS
-            long frameTime = System.currentTimeMillis() - startTime;
-            if (frameTime < millisecondsPerFrame) {
-                sleeper.sleepFor(millisecondsPerFrame - frameTime);
-            }
-        }
-
-        if (blockCounter.getValue() <= 0) {
-            System.out.println("You Win!\nYour Score is " + score.getValue());
-        } else {
-            System.out.println("Game Over.\nYour Score is " + score.getValue());
-        }
-        gui.close();
+    public boolean isFinished() { 
+        return finished; 
     }
 
-//    public void run() {
-//        int framesPerSecond = 60;
-//        int millisecondsPerFrame = 1000 / framesPerSecond;
-//        Image background = null;
-//
-//        try {
-//            BufferedImage raw = ImageIO.read(
-//                    new File("C:/Users/Yoad/OneDrive/Desktop/First year/OOP/ass5/freakbob.jpg"));
-//            background = raw.getScaledInstance(800, 600, Image.SCALE_SMOOTH); // ✅ Scale once
-//        } catch (IOException e) {
-//            System.out.println("Error loading background: " + e.getMessage());
-//        }
-//
-//        while (blockCounter.getValue() > 0 && ballCounter.getValue() > 0) {
-//            long startTime = System.currentTimeMillis(); // Timing for frame duration
-//
-//            // Notify all sprites that time has passed
-//            this.sprites.notifyAllTimePassed();
-//
-////            // Get the draw surface and render all sprites
-//            DrawSurface d = gui.getDrawSurface();
-//            // Then later, check if background is not null
-//            if (background != null) {
-//                d.drawImage(0, 0, background);
-//            } else {
-//                d.setColor(Color.BLUE);
-//                d.fillRectangle(0, 0, 800, 600);
-//            }
-//
-//            // Draw the rest of the sprites after the background
-//            this.sprites.drawAllOn(d);
-//            gui.show(d);
-//
-//            // Timing control: Sleep to maintain FPS
-//            long frameTime = System.currentTimeMillis() - startTime;
-//            if (frameTime < millisecondsPerFrame) {
-//                sleeper.sleepFor(millisecondsPerFrame - frameTime);
-//            }
-//        }
-//    }
+    public String  getEndMessage() { 
+        return endMessage; 
+    }
+
+    public Counter getScoreCounter() {
+         return score; 
+    }
+
+    public Counter getBlockCounter() { 
+        return blockCounter; 
+    }
+
+    public Counter getBallCounter() { 
+        return ballCounter; 
+    }
+
+    private static double textWidth(GraphicsContext g, String s) {
+    Text t = new Text(s);
+    t.setFont(g.getFont());
+    return t.getLayoutBounds().getWidth();
+}
 }
