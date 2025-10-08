@@ -1,5 +1,8 @@
 # Arkanoid (Java 17 + Gradle)
 
+[![Java CI](https://github.com/yoadlotan124/Arkanoid/actions/workflows/ci.yml/badge.svg)](https://github.com/yoadlotan124/Arkanoid/actions/workflows/ci.yml)
+
+
 A modern, object-oriented Java recreation of the classic **Arkanoid / Breakout** arcade game.  
 Originally built for a university OOP course, now refactored with a cleaner architecture, improved physics, and future-ready design.
 

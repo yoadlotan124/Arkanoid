@@ -1,6 +1,7 @@
 plugins {
     application
     java
+    id("com.diffplug.spotless") version "6.25.0"
 }
 
 java {
@@ -32,4 +33,13 @@ tasks.test {
 // ensure correct stdlib targeting
 tasks.withType(JavaCompile::class) {
     options.release.set(17)
+}
+
+spotless {
+    java {
+        target("src/**/*.java")
+        googleJavaFormat() // defaults to latest supported
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
 }
