@@ -1,6 +1,6 @@
 package com.yoad.arkanoid;
 
-import com.yoad.arkanoid.game.Game; // change if your Game is in .core
+import com.yoad.arkanoid.game.Game;
 
 public class App {
     public static void main(String[] args) {
