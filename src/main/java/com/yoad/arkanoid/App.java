@@ -1,7 +1,11 @@
 package com.yoad.arkanoid;
 
+import com.yoad.arkanoid.game.Game; // change if your Game is in .core
+
 public class App {
     public static void main(String[] args) {
-        System.out.println("App boot OK");
+        Game game = new Game();
+        game.initialize();
+        game.run();
     }
 }

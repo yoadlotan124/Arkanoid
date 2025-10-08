@@ -22,7 +22,7 @@ dependencies {
 
 application {
     // Use your current main first; we can switch to App later
-    mainClass.set("com.yoad.arkanoid.Ass5Game")
+    mainClass.set("com.yoad.arkanoid.App")
 }
 
 tasks.test {
