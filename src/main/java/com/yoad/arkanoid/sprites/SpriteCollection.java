@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * {@code sprites.SpriteCollection} is a class that manages a collection of {@link Sprite} objects.
  * It allows adding new sprites to the collection, updating all sprites with the passage of time,
- * and drawing all sprites onto a given {@link DrawSurface}.
+ * and drawing all sprites onto a given {@link GraphicsContext}.
  */
 public class SpriteCollection {
 
@@ -56,10 +56,10 @@ public class SpriteCollection {
   }
 
   /**
-   * Draws all sprites in the collection on the given {@link DrawSurface}. Calls the {@link
-   * Sprite#drawOn(DrawSurface)} method for each sprite to render them.
+   * Draws all sprites in the collection on the given {@link GraphicsContext}. Calls the {@link
+   * Sprite#draw(GraphicsContext)} method for each sprite to render them.
    *
-   * @param d the {@link DrawSurface} on which the sprites will be drawn. This surface is where the
+   * @param g the {@link GraphicsContext} on which the sprites will be drawn. This surface is where the
    *     graphical elements will be rendered.
    */
   public void drawAll(GraphicsContext g) {

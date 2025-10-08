@@ -7,6 +7,8 @@ import javafx.scene.text.Font;
 import com.yoad.arkanoid.events.Counter;
 import com.yoad.arkanoid.game.ArkanoidGame;
 
+import static com.yoad.arkanoid.game.Dimensions.*;
+
 
 /**
  * A {@code ScoreIndicator} is a {@link Sprite} that displays the current score
@@ -27,13 +29,13 @@ public class ScoreHUD implements Sprite {
     /**
      * Draws the score indicator text on the given draw surface.
      *
-     * @param d the DrawSurface to draw on
+     * @param g the Surface to draw on
      */
     @Override
     public void draw(GraphicsContext g) {
         g.setFill(Color.WHITE);
-        g.setFont(Font.font(18));
-        g.fillText("Score: " + currentScore.getValue(), 350, 60);
+        g.setFont(Font.font(18 * SCALE));
+        g.fillText("Score: " + currentScore.getValue(), sx(350), sx(60));
     }
 
     /**

@@ -46,10 +46,10 @@ public class Brick implements Collidable, Sprite, HitNotifier {
     }
 
     /**
-     * Draws the block on the given DrawSurface.
+     * Draws the block.
      * The block is filled with its specified color and positioned according to its rectangle.
      *
-     * @param surface the DrawSurface on which the block will be drawn
+     * @param g the Surface on which the block will be drawn
      */
     @Override
     public void draw(javafx.scene.canvas.GraphicsContext g) {

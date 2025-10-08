@@ -10,10 +10,11 @@ import javafx.stage.Stage;
 
 import com.yoad.arkanoid.game.ArkanoidGame;
 
+import static com.yoad.arkanoid.game.Dimensions.WIDTH;
+import static com.yoad.arkanoid.game.Dimensions.HEIGHT;
+
 /** Boots JavaFX and drives the game loop via AnimationTimer. */
 public class FxLauncher extends Application {
-    private static final int WIDTH = 800;   // set to your real width
-    private static final int HEIGHT = 600;  // set to your real height
 
     @Override
     public void start(Stage stage) {

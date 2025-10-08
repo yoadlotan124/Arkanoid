@@ -77,9 +77,9 @@ public class Ball implements Sprite {
     }
 
     /**
-     * Draws the ball on the specified DrawSurface.
+     * Draws the ball on the specified Surface.
      *
-     * @param surface the DrawSurface on which to draw the ball
+     * @param g the Surface on which to draw the ball
      */
     @Override
     public void draw(GraphicsContext g) {

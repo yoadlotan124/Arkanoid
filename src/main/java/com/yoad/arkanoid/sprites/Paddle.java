@@ -9,6 +9,8 @@ import com.yoad.arkanoid.physics.Collidable;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+import static com.yoad.arkanoid.game.Dimensions.*;
+
 /**
  * The sprites.Paddle class represents a paddle in the game.
  * It implements both the sprites.Sprite and physics.Collidable interfaces.
@@ -25,7 +27,7 @@ public class Paddle implements Sprite, Collidable {
     private boolean rightPressed = false;
 
     // Movement tuning
-    private static final int SPEED = 6;
+    private static final int SPEED = sx(6);;
 
     /**
      * Constructs a new sprites.Paddle object with a specified rectangle.
@@ -46,21 +48,21 @@ public class Paddle implements Sprite, Collidable {
      * Moves the paddle to the left by 5 units.
      */
     public void moveLeft() {
-        rectangle.move(-SPEED);
-        if (rectangle.getStartX() <= -50) {
-            rectangle.move(862);
-        }
+    rectangle.move(-SPEED);
+    if (rectangle.getStartX() <= -sx(50)) {
+        rectangle.move(sx(862)); // 862 * 1.5 preserves prior wrap behavior
     }
+}
 
     /**
      * Moves the paddle to the right by 5 units.
      */
     public void moveRight() {
-        rectangle.move(SPEED);
-        if (rectangle.getStartX() >= 760) {
-            rectangle.move(-862);
-        }
+    rectangle.move(SPEED);
+    if (rectangle.getStartX() >= sx(760)) {
+        rectangle.move(-sx(862));
     }
+}
 
     /**
      * This method is called when time has passed. It checks for key presses

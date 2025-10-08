@@ -9,9 +9,9 @@ import javafx.scene.canvas.GraphicsContext;
 public interface Sprite {
 
   /**
-   * Draws the sprite on the given {@link DrawSurface}.
+   * Draws the sprite on the given {@link GraphicsContext}.
    *
-   * @param d the {@link DrawSurface} on which the sprite will be drawn. This object is used to
+   * @param g the {@link GraphicsContext} on which the sprite will be drawn. This object is used to
    *     display graphical elements.
    */
   void draw(GraphicsContext g);

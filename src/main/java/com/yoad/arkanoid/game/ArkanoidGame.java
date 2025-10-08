@@ -21,15 +21,13 @@ import javafx.scene.input.KeyCode;
 
 import java.util.Objects;
 
+import static com.yoad.arkanoid.game.Dimensions.*;
+
 /**
  * The game.ArkanoidGame class is responsible for managing the game logic, including the creation and update of sprites,
  * handling game environment interactions, and managing the game loop for rendering and timing.
  */
 public class ArkanoidGame {
-
-    //Screen size
-    public static final int WIDTH = 800;
-    public static final int HEIGHT = 600;
 
     private final SpriteCollection sprites = new SpriteCollection();
     private final World environment = new World();
@@ -67,29 +65,29 @@ public class ArkanoidGame {
         new ScoreHUD(score).addToGame(this);
 
         // Paddle
-        Rectangle r = new Rectangle(357, 576, 94, 12);
+        Rectangle r = new Rectangle(sx(357), sx(576), sx(94), sx(12));
         paddle = new Paddle(r);
         paddle.addToGame(this);
 
         // Balls
-        int radius = 6;
-        Ball ball1 = new Ball(new Point(200, 400), radius, java.awt.Color.WHITE, this.environment);
-        ball1.setVelocity(3, -3);
+        int radius = sx(6);
+        Ball ball1 = new Ball(new Point(sx(200), sx(400)), radius, java.awt.Color.WHITE, this.environment);
+        ball1.setVelocity(sd(3), sd(-3));
         ball1.addToGame(this);
 
-        Ball ball2 = new Ball(new Point(400, 420), radius, java.awt.Color.WHITE, this.environment);
-        ball2.setVelocity(-3, -3);
+        Ball ball2 = new Ball(new Point(sx(400), sx(420)), radius, java.awt.Color.WHITE, this.environment);
+        ball2.setVelocity(sd(-3), sd(-3));
         ball2.addToGame(this);
 
-        Ball ball3 = new Ball(new Point(600, 410), radius, java.awt.Color.WHITE, this.environment);
-        ball3.setVelocity(3, -3);
+        Ball ball3 = new Ball(new Point(sx(600), sx(410)), radius, java.awt.Color.WHITE, this.environment);
+        ball3.setVelocity(sd(3), sd(-3));
         ball3.addToGame(this);
 
         ballCounter.increase(3);
 
         // Bricks (grid)
-        int blockWidth = 49;
-        int blockHeight = 23;
+        int blockWidth = sx(49);
+        int blockHeight = sx(23);
         int rows = 6;
         int cols = 12;
 
@@ -101,8 +99,8 @@ public class ArkanoidGame {
         for (int row = 0; row < rows; row++) {
             java.awt.Color currentColor = colors[row % colors.length];
             for (int col = 0; col < cols; col++) {
-                int x = 723 - col * 49;
-                int y = 150 + row * 23;
+                int x = sx(723) - col * sx(49);
+                int y = sx(150) + row * sx(23);
                 Brick block = new Brick(new Rectangle(new Point(x, y), blockWidth, blockHeight), currentColor);
                 block.addToGame(this);
                 blockCounter.increase(1);
@@ -113,15 +111,15 @@ public class ArkanoidGame {
         }
 
         // Walls (top/left/right) + bottom (death)
-        Brick block1 = new Brick(new Rectangle(new Point(0, 0), 800, 28), java.awt.Color.GRAY);
-        block1.addToGame(this);
-        Brick block2 = new Brick(new Rectangle(new Point(0, 28), 28, 772), java.awt.Color.GRAY);
-        block2.addToGame(this);
-        Brick block3 = new Brick(new Rectangle(new Point(772, 28), 28, 772), java.awt.Color.GRAY);
-        block3.addToGame(this);
-        Brick block4 = new Brick(new Rectangle(new Point(28, 600), 744, 28), java.awt.Color.GRAY);
-        block4.addHitListener(ballRemover);
-        block4.addToGame(this);
+        Brick topWall = new Brick(new Rectangle(new Point(0, 0), WIDTH, sx(28)), java.awt.Color.GRAY);
+        topWall.addToGame(this);
+        Brick leftWall = new Brick(new Rectangle(new Point(0, sx(28)), sx(28), HEIGHT - sx(28)), java.awt.Color.GRAY);
+        leftWall.addToGame(this);
+        Brick rightWall = new Brick(new Rectangle(new Point(WIDTH - sx(28), sx(28)), sx(28), HEIGHT - sx(28)), java.awt.Color.GRAY);
+        rightWall.addToGame(this);
+        Brick bottomWall = new Brick(new Rectangle(new Point(sx(28), HEIGHT), WIDTH - sx(56), sx(28)), java.awt.Color.GRAY);
+        bottomWall.addHitListener(ballRemover);
+        bottomWall.addToGame(this);
     }
 
     // ---------------- Input from JavaFX ----------------
@@ -195,7 +193,7 @@ public class ArkanoidGame {
             g.fillText(line, (WIDTH - w) / 2.0, y);
             y += 36;
         }
-        g.setFont(Font.font(18));
+        g.setFont(Font.font(sx(18)));
         g.fillText("Press ENTER to restart", WIDTH / 2.0 - 110, y + 10);
 
         // Simple restart on ENTER (re-init world)
