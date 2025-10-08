@@ -1,8 +1,8 @@
 package com.yoad.arkanoid.sprites;
 
 import biuoop.DrawSurface;
-import com.yoad.arkanoid.game.Game;
-import com.yoad.arkanoid.notifiers.Counter;
+import com.yoad.arkanoid.game.ArkanoidGame;
+import com.yoad.arkanoid.events.Counter;
 import java.awt.Color;
 
 /**
@@ -43,7 +43,7 @@ public class ScoreIndicator implements Sprite {
    *
    * @param g the game to add this sprite to
    */
-  public void addToGame(Game g) {
+  public void addToGame(ArkanoidGame g) {
     g.addSprite(this);
   }
 }

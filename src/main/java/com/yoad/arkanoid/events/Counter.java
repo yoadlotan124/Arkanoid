@@ -1,4 +1,4 @@
-package com.yoad.arkanoid.notifiers;
+package com.yoad.arkanoid.events;
 
 /**
  * The {@code Counter} class is a simple utility to keep track of a numeric count. It allows

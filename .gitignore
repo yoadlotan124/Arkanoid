@@ -2,11 +2,14 @@
 .gradle/
 build/
 
-# IDE
+# IDEs
 .idea/
 *.iml
 .vscode/
 
-# OS
+# OS noise
 .DS_Store
+Thumbs.db
+
+# Logs
 *.log
