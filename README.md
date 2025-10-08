@@ -32,3 +32,19 @@ Clone and run with Gradle:
 ```bash
 git clone https://github.com/yoadlotan124/Arkanoid.git
 cd Arkanoid
+
+Run (dev)
+./gradlew run        # macOS/Linux
+gradlew run          # Windows
+
+Build (tests + compile)
+./gradlew clean build        # macOS/Linux
+gradlew clean build          # Windows
+
+Run tests
+./gradlew test               # macOS/Linux
+gradlew test                 # Windows
+
+Create a distributable app
+./gradlew installDist        # macOS/Linux
+gradlew installDist          # Windows
