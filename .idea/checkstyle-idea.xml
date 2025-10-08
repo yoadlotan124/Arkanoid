@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CheckStyle-IDEA" serialisationVersion="2">
+    <checkstyleVersion>10.21.3</checkstyleVersion>
+    <scanScope>JavaOnly</scanScope>
+    <copyLibs>true</copyLibs>
+    <option name="thirdPartyClasspath">
+      <option value="C:\Users\Yoad\OneDrive\Desktop\First year\OOP\TicTacToeTargil\ex6\checkstyle-8.44-all.jar" />
+    </option>
+    <option name="activeLocationIds">
+      <option value="78dcc9b5-2351-40a7-8b1f-9dc5e2b8b519" />
+    </option>
+    <option name="locations">
+      <list>
+        <ConfigurationLocation id="bundled-sun-checks" type="BUNDLED" scope="All" description="Sun Checks">(bundled)</ConfigurationLocation>
+        <ConfigurationLocation id="bundled-google-checks" type="BUNDLED" scope="All" description="Google Checks">(bundled)</ConfigurationLocation>
+        <ConfigurationLocation id="78dcc9b5-2351-40a7-8b1f-9dc5e2b8b519" type="LOCAL_FILE" scope="All" description="OOP">
+          $PROJECT_DIR$/biuoop.xml
+          <option name="properties">
+            <map>
+              <entry key="org.checkstyle.sun.suppressionfilter.config" value="checkstyle-suppressions.xml" />
+              <entry key="org.checkstyle.sun.suppressionxpathfilter.config" value="checkstyle-xpath-suppressions.xml" />
+            </map>
+          </option>
+        </ConfigurationLocation>
+      </list>
+    </option>
+  </component>
+</project>
