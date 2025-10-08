@@ -5,16 +5,27 @@
     <scanScope>JavaOnly</scanScope>
     <copyLibs>true</copyLibs>
     <option name="thirdPartyClasspath">
+<<<<<<< HEAD
       <option value="C:\Users\Yoad\OneDrive\Desktop\First year\OOP\ass5\checkstyle-8.44-all.jar" />
     </option>
     <option name="activeLocationIds">
       <option value="b0f549bf-b019-45cb-b68d-bab86839f0b6" />
+=======
+      <option value="C:\Users\Yoad\OneDrive\Desktop\First year\OOP\TicTacToeTargil\ex6\checkstyle-8.44-all.jar" />
+    </option>
+    <option name="activeLocationIds">
+      <option value="78dcc9b5-2351-40a7-8b1f-9dc5e2b8b519" />
+>>>>>>> e774eee2d4bef66ed8020b506a866b0b0ec72d69
     </option>
     <option name="locations">
       <list>
         <ConfigurationLocation id="bundled-sun-checks" type="BUNDLED" scope="All" description="Sun Checks">(bundled)</ConfigurationLocation>
         <ConfigurationLocation id="bundled-google-checks" type="BUNDLED" scope="All" description="Google Checks">(bundled)</ConfigurationLocation>
+<<<<<<< HEAD
         <ConfigurationLocation id="b0f549bf-b019-45cb-b68d-bab86839f0b6" type="LOCAL_FILE" scope="All" description="OOP">
+=======
+        <ConfigurationLocation id="78dcc9b5-2351-40a7-8b1f-9dc5e2b8b519" type="LOCAL_FILE" scope="All" description="OOP">
+>>>>>>> e774eee2d4bef66ed8020b506a866b0b0ec72d69
           $PROJECT_DIR$/biuoop.xml
           <option name="properties">
             <map>
