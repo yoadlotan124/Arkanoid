@@ -1,6 +1,6 @@
 package com.yoad.arkanoid.events;
 
-import com.yoad.arkanoid.game.Block;
+import com.yoad.arkanoid.game.Brick;
 import com.yoad.arkanoid.sprites.Ball;
 
 /**
@@ -29,7 +29,7 @@ public class ScoreTrackingListener implements HitListener {
    * @param hitter the ball that hit the block
    */
   @Override
-  public void hitEvent(Block beingHit, Ball hitter) {
+  public void hitEvent(Brick beingHit, Ball hitter) {
     currentScore.increase(5);
   }
 }

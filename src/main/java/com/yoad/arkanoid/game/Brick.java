@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** represents a class for our game blocks that will be rectangles. */
-public class Block implements Collidable, Sprite, HitNotifier {
+public class Brick implements Collidable, Sprite, HitNotifier {
   // Fields
   private final Rectangle rect;
   private final Color color;
@@ -26,7 +26,7 @@ public class Block implements Collidable, Sprite, HitNotifier {
    * @param rect represents our block
    * @param color color to be set
    */
-  public Block(Rectangle rect, Color color) {
+  public Brick(Rectangle rect, Color color) {
     this.rect = rect;
     this.color = color;
     this.hitListeners = new ArrayList<>();

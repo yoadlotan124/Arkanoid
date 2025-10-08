@@ -116,8 +116,8 @@ public class Game {
       for (int col = 0; col < cols; col++) {
         int x = 723 - col * 49; // X position with margin
         int y = 150 + row * 23; // Y position with margin
-        Block block =
-            new Block(new Rectangle(new Point(x, y), blockWidth, blockHeight), currentColor);
+        Brick block =
+            new Brick(new Rectangle(new Point(x, y), blockWidth, blockHeight), currentColor);
         block.addToGame(this); // Add each block to the game
         blockCounter.increase(1);
         block.addHitListener(blockRemover);
@@ -126,13 +126,13 @@ public class Game {
       cols--; // Shrinking the number of blocks each row
     }
 
-    Block block1 = new Block(new Rectangle(new Point(0, 0), 800, 28), Color.GRAY);
+    Brick block1 = new Brick(new Rectangle(new Point(0, 0), 800, 28), Color.GRAY);
     block1.addToGame(this);
-    Block block2 = new Block(new Rectangle(new Point(0, 28), 28, 772), Color.GRAY);
+    Brick block2 = new Brick(new Rectangle(new Point(0, 28), 28, 772), Color.GRAY);
     block2.addToGame(this);
-    Block block3 = new Block(new Rectangle(new Point(772, 28), 28, 772), Color.GRAY);
+    Brick block3 = new Brick(new Rectangle(new Point(772, 28), 28, 772), Color.GRAY);
     block3.addToGame(this);
-    Block block4 = new Block(new Rectangle(new Point(28, 600), 744, 28), Color.GRAY);
+    Brick block4 = new Brick(new Rectangle(new Point(28, 600), 744, 28), Color.GRAY);
     block4.addHitListener(ballRemover);
     block4.addToGame(this);
   }

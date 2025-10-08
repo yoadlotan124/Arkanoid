@@ -1,6 +1,6 @@
 package com.yoad.arkanoid.events;
 
-import com.yoad.arkanoid.game.Block;
+import com.yoad.arkanoid.game.Brick;
 import com.yoad.arkanoid.game.Game;
 import com.yoad.arkanoid.sprites.Ball;
 
@@ -26,14 +26,14 @@ public class BallRemover implements HitListener {
   }
 
   /**
-   * This method is called whenever a {@link Block} is hit. It removes the hitting {@link Ball} from
+   * This method is called whenever a {@link Brick} is hit. It removes the hitting {@link Ball} from
    * the game and updates the ball counter.
    *
    * @param beingHit the block that was hit (usually the "death" block).
    * @param hitter the ball that hit the block and should be removed.
    */
   @Override
-  public void hitEvent(Block beingHit, Ball hitter) {
+  public void hitEvent(Brick beingHit, Ball hitter) {
     hitter.removeFromGame(game);
     remainingBalls.decrease(1);
   }
