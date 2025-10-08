@@ -25,7 +25,7 @@ import java.awt.Color;
 public class Game {
 
   private SpriteCollection sprites;
-  private GameEnvironment environment;
+  private World environment;
   private GUI gui;
   private DrawSurface d;
   private Sleeper sleeper;
@@ -39,7 +39,7 @@ public class Game {
   /** Constructs a new game.Game object. Initializes the sprite collection and game environment. */
   public Game() {
     sprites = new SpriteCollection();
-    environment = new GameEnvironment();
+    environment = new World();
     blockCounter = new Counter();
     score = new Counter();
     ballCounter = new Counter();

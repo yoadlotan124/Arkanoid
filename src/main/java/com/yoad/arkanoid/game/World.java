@@ -9,13 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /** Environment of the game, meaning the rectangles to collide with and such. */
-public class GameEnvironment {
+public class World {
   // Fields
   private final Rectangle screen;
   private final List<Collidable> collidables;
 
   /** Constructor for the game environment. */
-  public GameEnvironment() {
+  public World() {
     screen = new Rectangle(28, 28, 772, 572);
     collidables = new ArrayList<>();
   }

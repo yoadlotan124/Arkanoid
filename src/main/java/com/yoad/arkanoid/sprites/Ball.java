@@ -2,7 +2,7 @@ package com.yoad.arkanoid.sprites;
 
 import biuoop.DrawSurface;
 import com.yoad.arkanoid.game.Game;
-import com.yoad.arkanoid.game.GameEnvironment;
+import com.yoad.arkanoid.game.World;
 import com.yoad.arkanoid.geometry.Line;
 import com.yoad.arkanoid.geometry.Point;
 import com.yoad.arkanoid.geometry.Rectangle;
@@ -21,7 +21,7 @@ public class Ball implements Sprite {
   private final int radius;
   private Color color;
   private Velocity velocity;
-  private GameEnvironment environment;
+  private World environment;
 
   /**
    * Constructs a sprites.Ball object with a specified center point, radius, and color.
@@ -31,7 +31,7 @@ public class Ball implements Sprite {
    * @param color the color of the ball
    * @param environment the balls environment
    */
-  public Ball(Point center, int r, java.awt.Color color, GameEnvironment environment) {
+  public Ball(Point center, int r, java.awt.Color color, World environment) {
     this.center = center;
     this.radius = r;
     this.color = color;
@@ -110,7 +110,7 @@ public class Ball implements Sprite {
    *
    * @param env
    */
-  public void setEnvironment(GameEnvironment env) {
+  public void setEnvironment(World env) {
     this.environment = env;
   }
 
