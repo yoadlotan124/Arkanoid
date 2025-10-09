@@ -536,30 +536,26 @@ public class ArkanoidGame {
                 // decide vertical sign: keep current up/down, or force up (-1.0)
                 double signY = (b.getVelocity().getDy() < 0 ? -1.0 : 1.0);
 
-                // spawn up to 2 clones per source ball: one to the right, one to the left
-                int clonesForThis = Math.min(2, canAdd - spawned);
-                for (int i = 0; i < clonesForThis; i++) {
-                    double dx = (i == 0 ? +s : -s);
-                    double dy = signY * s;
+                double dx = +s * 0.95;
+                double dy = signY * s;
 
-                    // nudge start so it doesn’t overlap the source ball
-                    double offset = b.getSize() + sx(2);
-                    double ox = (i == 0 ? +offset : -offset);
-                    double oy = -offset;
+                // nudge start so it doesn’t overlap the source ball
+                double offset = b.getSize() + sx(2);
+                double ox = +offset;
+                double oy = -offset;
 
-                    Ball nb = new Ball(
-                        new Point(b.getX() + ox, b.getY() + oy),
-                        b.getSize(),
-                        b.getColor(),
-                        this.environment
-                    );
-                    nb.setVelocity(dx, dy);     // EXACTLY like your initial spawn (±s, -s)
-                    nb.addToGame(this);
+                Ball nb = new Ball(
+                    new Point(b.getX() + ox, b.getY() + oy),
+                    b.getSize(),
+                    b.getColor(),
+                    this.environment
+                );
+                nb.setVelocity(dx, dy);     // EXACTLY like your initial spawn (±s, -s)
+                nb.addToGame(this);
 
-                    ballCounter.increase(1);
-                    spawned++;
-                    if (spawned >= canAdd) break;
-                }
+                ballCounter.increase(1);
+                spawned++;
+                if (spawned >= canAdd) break;
             }
         }
     }
