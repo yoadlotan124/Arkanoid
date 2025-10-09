@@ -7,23 +7,27 @@ plugins {
 
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
 }
+
 tasks.withType(JavaCompile::class) { options.release.set(17) }
 
 repositories { mavenCentral() }
 
 dependencies {
+    // JUnit 5 BOM + api/engine
     testImplementation(platform("org.junit:junit-bom:5.10.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 javafx {
     version = "21.0.5"
     modules = listOf("javafx.controls", "javafx.graphics", "javafx.media")
 }
-
 
 application {
     mainClass.set("com.yoad.arkanoid.App") // or FxLauncher if you prefer
