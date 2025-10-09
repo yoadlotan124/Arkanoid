@@ -18,9 +18,7 @@ class CollisionMathTest {
         // Horizontal line passing through the rectangle's left edge (x=0) at y=25
         Line l = new Line(-10, 25, 10, 25);
 
-        // Depending on your API, assert via rectangle/line helpers you already have.
-        // If your Rectangle exposes its edges as lines, replace these with your actual calls.
-        // This keeps the test lightweight but meaningful.
+        // If Rectangle exposes its edges as lines, replace these with actual calls.
         assertTrue(l.isIntersecting(new Line(0, 0, 0, 50)));
     }
 
@@ -34,7 +32,6 @@ class CollisionMathTest {
                 return r;
             }
 
-            // IMPORTANT: match your interface exactly (Ball, Point, Velocity)
             @Override
             public Velocity hit(Ball hitter, Point collisionPoint, Velocity currentVelocity) {
                 // No-op: just return the incoming velocity so test remains pure.

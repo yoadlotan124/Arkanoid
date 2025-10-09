@@ -21,27 +21,21 @@ public class SpriteCollection {
    * @param s the {@link Sprite} to be added to the collection. This sprite will be managed by the
    *     collection for updates and drawing.
    */
-  public void addSprite(Sprite s) {
-    this.sprites.add(s);
-  }
+  public void addSprite(Sprite s) { this.sprites.add(s); }
 
   /**
    * Removes a sprite from the collection.
    *
    * @param s the {@link Sprite} to be removed from the collection.
    */
-  public void removeSprite(Sprite s) {
-     sprites.remove(s); 
-  }
+  public void removeSprite(Sprite s) { sprites.remove(s); }
 
   /**
    * returns the sprites.
    *
    * @return sprite list.
    */
-  public List<Sprite> getSprites() {
-    return this.sprites;
-  }
+  public List<Sprite> getSprites() { return this.sprites; }
 
   /**
    * Notifies all sprites in the collection that time has passed. Calls the {@link
@@ -51,7 +45,7 @@ public class SpriteCollection {
   public void notifyAllTimePassed() {
     List<Sprite> spriteCopy = new ArrayList<>(this.sprites); // Make a copy
     for (Sprite s : spriteCopy) {
-      s.timePassed();
+      s.timePassed(); 
     }
   }
 
@@ -64,7 +58,7 @@ public class SpriteCollection {
    */
   public void drawAll(GraphicsContext g) {
         for (Sprite s : new ArrayList<>(sprites)) {
-            s.draw(g);
+          s.draw(g); 
         }
     }
 }

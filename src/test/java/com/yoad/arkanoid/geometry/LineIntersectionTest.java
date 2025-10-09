@@ -27,7 +27,6 @@ class LineIntersectionTest {
   void collinearOverlapHandled() {
     Line a = new Line(0, 0, 10, 0);
     Line b = new Line(5, 0, 15, 0);
-    // depends on your API; assertTrue(a.isIntersecting(b)) if provided
     assertTrue(a.isIntersecting(b));
   }
 }

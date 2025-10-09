@@ -14,7 +14,6 @@ import com.yoad.arkanoid.sprites.Sprite;
 import com.yoad.arkanoid.sprites.SpriteCollection;
 
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.MenuButton;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -22,6 +21,8 @@ import javafx.scene.input.KeyCode;
 
 import java.util.Objects;
 
+import com.yoad.arkanoid.ui.MenuButton;
+import static com.yoad.arkanoid.ui.UIUtils.*;
 import static com.yoad.arkanoid.game.Dimensions.*;
 
 /**
@@ -47,7 +48,8 @@ public class ArkanoidGame {
     private boolean paused = false;
 
     // Pause menu buttons
-    private MenuButton btnResume, btnRestart, btnQuit;
+    private MenuButton btnResume, btnRestart, btnLobby;
+    private boolean returnToMenuRequested = false;
     private double mouseX = -1, mouseY = -1; // for hover
 
     // Game accounting
@@ -62,22 +64,6 @@ public class ArkanoidGame {
     // End state
     private boolean finished = false;
     private String endMessage = "";
-
-    
-    //Button helper class
-    private static final class MenuButton {
-        double x, y, w, h;
-        String label;
-        boolean hovered = false;
-
-        MenuButton(String label, double x, double y, double w, double h) {
-            this.label = label; this.x = x; this.y = y; this.w = w; this.h = h;
-        }
-
-        boolean contains(double px, double py) {
-            return px >= x && px <= x + w && py >= y && py <= y + h;
-        }
-    }
 
     /**
      * creates pause buttons during menu pullup
@@ -94,9 +80,9 @@ public class ArkanoidGame {
         double y0 = panelY + sx(70);
         double gap = sx(14);
 
-        btnResume = new MenuButton("Resume", x, y0, btnW, btnH);
-        btnRestart = new MenuButton("Restart", x, y0 + btnH + gap, btnW, btnH);
-        btnQuit = new MenuButton("Quit", x, y0 + 2*(btnH+gap),btnW, btnH);
+        btnResume  = new MenuButton("Resume",          x, y0,                  btnW, btnH);
+        btnRestart = new MenuButton("Restart",         x, y0 + btnH + gap,     btnW, btnH);
+        btnLobby   = new MenuButton("Return to Lobby", x, y0 + 2*(btnH+gap),   btnW, btnH);
     }
 
     /**
@@ -186,18 +172,19 @@ public class ArkanoidGame {
     public void onMouseMoved(double x, double y) {
         mouseX = x; mouseY = y;
         if (!paused) return;
-        // Update hover states
-        btnResume.hovered = btnResume.contains(x, y);
+        btnResume.hovered  = btnResume.contains(x, y);
         btnRestart.hovered = btnRestart.contains(x, y);
-        btnQuit.hovered = btnQuit.contains(x, y);
+        btnLobby.hovered   = btnLobby.contains(x, y);
     }
+
 
     public void onMouseClicked(double x, double y) {
         if (!paused) return;
-        if (btnResume.contains(x, y)) { paused = false; return; }
+        if (btnResume.contains(x, y))  { paused = false; return; }
         if (btnRestart.contains(x, y)) { restart(); paused = false; return; }
-        if (btnQuit.contains(x, y)) { finished = true; endMessage = "Quit\nScore: " + score.getValue(); paused = false; }
+        if (btnLobby.contains(x, y))   { returnToMenuRequested = true; paused = false; return; }
     }
+
 
     // ---------------- Per-frame update & render ----------------
 
@@ -330,7 +317,7 @@ public class ArkanoidGame {
         // buttons
         drawButton(g, btnResume,  Color.web("#22c55e"), Color.web("#16a34a")); // green
         drawButton(g, btnRestart, Color.web("#60a5fa"), Color.web("#3b82f6")); // blue
-        drawButton(g, btnQuit,    Color.web("#f97316"), Color.web("#ea580c")); // orange
+        drawButton(g, btnLobby,    Color.web("#f97316"), Color.web("#ea580c")); // orange
     }
 
 
@@ -399,18 +386,9 @@ public class ArkanoidGame {
     }
 
     private void drawButton(GraphicsContext g, MenuButton b, Color base, Color hover) {
-        double r = sx(10);
-        Color fill = b.hovered ? hover : base;
-        g.setFill(fill);
-        fillRoundRect(g, b.x, b.y, b.w, b.h, r);
-        g.setStroke(Color.color(1, 1, 1, 0.15));
-        g.setLineWidth(1.0);
-        strokeRoundRect(g, b.x, b.y, b.w, b.h, r);
-
-        g.setFill(Color.WHITE);
-        g.setFont(Font.font(18 * SCALE));
-        drawCentered(g, b.label, b.x + b.w / 2.0, b.y + b.h / 2.0 + sx(6));
-    }
+    // Pause menu uses slightly smaller font + radius than main menu
+    b.draw(g, base, hover, 18 * SCALE, sx(10));
+}
 
     private void fillRoundRect(GraphicsContext g, double x, double y, double w, double h, double arc) {
         g.fillRoundRect(x, y, w, h, arc, arc);
@@ -426,4 +404,13 @@ public class ArkanoidGame {
         g.fillText(text, cx - w / 2.0, cy);
     }
 
+    /**
+     * returns to the main menu once requested
+     * @return true or false depending on if pressed
+     */
+    public boolean consumeReturnToMenuRequest() {
+        boolean r = returnToMenuRequested;
+        returnToMenuRequested = false;
+        return r;
+    }
 }

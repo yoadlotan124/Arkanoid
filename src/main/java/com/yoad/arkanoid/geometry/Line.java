@@ -42,9 +42,7 @@ public class Line {
    *
    * @return The length of the line segment.
    */
-  public double getLength() {
-    return this.length;
-  }
+  public double getLength() { return this.length; }
 
   /**
    * Returns the midpoint of the line.
@@ -61,18 +59,14 @@ public class Line {
    *
    * @return The start point of the line.
    */
-  public Point getStart() {
-    return new Point(this.start.getX(), this.start.getY());
-  }
+  public Point getStart() { return new Point(this.start.getX(), this.start.getY()); }
 
   /**
    * Returns the end point of the line.
    *
    * @return The end point of the line.
    */
-  public Point getEnd() {
-    return new Point(this.end.getX(), this.end.getY());
-  }
+  public Point getEnd() { return new Point(this.end.getX(), this.end.getY()); }
 
   /**
    * Checks if the point p lies on the line segment.

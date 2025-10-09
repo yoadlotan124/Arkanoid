@@ -34,9 +34,7 @@ public class Paddle implements Sprite, Collidable {
      * @param rectangle The rectangle that represents the paddle's shape and size.
      * @param keyboard
      */
-    public Paddle(Rectangle rectangle) {
-        this.rectangle = rectangle;
-    }
+    public Paddle(Rectangle rectangle) { this.rectangle = rectangle; }
 
     /** Let the game feed input state each frame (e.g., from JavaFX key handlers). */
     public void setInput(boolean left, boolean right) {
@@ -48,21 +46,21 @@ public class Paddle implements Sprite, Collidable {
      * Moves the paddle to the left by 5 units.
      */
     public void moveLeft() {
-    rectangle.move(-SPEED);
-    if (rectangle.getStartX() <= -sx(50)) {
-        rectangle.move(sx(862)); // 862 * 1.5 preserves prior wrap behavior
+        rectangle.move(-SPEED);
+        if (rectangle.getStartX() <= -sx(50)) {
+            rectangle.move(sx(862)); // 862 * 1.5 preserves prior wrap behavior
+        }
     }
-}
 
     /**
      * Moves the paddle to the right by 5 units.
      */
     public void moveRight() {
-    rectangle.move(SPEED);
-    if (rectangle.getStartX() >= sx(760)) {
-        rectangle.move(-sx(862));
+        rectangle.move(SPEED);
+        if (rectangle.getStartX() >= sx(760)) {
+            rectangle.move(-sx(862));
+        }
     }
-}
 
     /**
      * This method is called when time has passed. It checks for key presses
@@ -92,9 +90,7 @@ public class Paddle implements Sprite, Collidable {
      * @return The rectangle representing the paddle's collision boundaries.
      */
     @Override
-    public Rectangle getCollisionRectangle() {
-        return rectangle;
-    }
+    public Rectangle getCollisionRectangle() { return rectangle; }
 
     /**
      * Handles the collision of the ball with the paddle. The ball's velocity changes
@@ -111,9 +107,9 @@ public class Paddle implements Sprite, Collidable {
         double currentDy = currentVelocity.getDy();
         double speed = Math.sqrt(currentDx * currentDx + currentDy * currentDy);
 
-        int paddleWidth = rectangle.getWidth();
-        int paddleLeftX = rectangle.getStartX();
-        int paddleTopY = rectangle.getStartY();
+        int paddleWidth   =               rectangle.getWidth();
+        int paddleLeftX   =              rectangle.getStartX();
+        int paddleTopY   =               rectangle.getStartY();
         int paddleBottomY = paddleTopY + rectangle.getHeight();
 
         // If collision is from BELOW the paddle (should not happen normally)
@@ -155,7 +151,7 @@ public class Paddle implements Sprite, Collidable {
      * @param g The game to add this paddle to.
      */
     public void addToGame(ArkanoidGame g) {
-        g.addSprite(this);
+        g.addSprite(this    );
         g.addCollidable(this);
     }
 }

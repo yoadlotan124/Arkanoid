@@ -15,6 +15,8 @@ import static com.yoad.arkanoid.game.Dimensions.*;
  * at the top of the screen.
  */
 public class ScoreHUD implements Sprite {
+
+    //Fields
     private Counter currentScore;
 
     /**
@@ -23,7 +25,7 @@ public class ScoreHUD implements Sprite {
      * @param currentScore the counter that tracks the score
      */
     public ScoreHUD(Counter currentScore) {
-        this.currentScore = currentScore;
+        this.currentScore = currentScore; 
     }
 
     /**
@@ -52,7 +54,5 @@ public class ScoreHUD implements Sprite {
      *
      * @param g the game to add this sprite to
      */
-    public void addToGame(ArkanoidGame g) {
-        g.addSprite(this);
-    }
+    public void addToGame(ArkanoidGame g) { g.addSprite(this); }
 }

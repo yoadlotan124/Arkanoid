@@ -46,35 +46,27 @@ public class Ball implements Sprite {
      *
      * @return the x-coordinate of the center
      */
-    public int getX() {
-        return (int) this.center.getX();
-    }
+    public int getX() { return (int) this.center.getX(); }
 
     /**
      * Returns the y-coordinate of the ball's center.
      *
      * @return the y-coordinate of the center
      */
-    public int getY() {
-        return (int) this.center.getY();
-    }
+    public int getY() { return (int) this.center.getY(); }
 
     /**
      * Returns the radius (size) of the ball.
      *
      * @return the radius of the ball
      */
-    public int getSize() {
-        return this.radius;
-    }
+    public int getSize() { return this.radius; }
 
     /**
      * returns this balls color.
      * @return color.
      */
-    public Color getColor() {
-        return this.color;
-    }
+    public Color getColor() { return this.color; }
 
     /**
      * Draws the ball on the specified Surface.
@@ -86,8 +78,7 @@ public class Ball implements Sprite {
         g.setFill(FxColors.toFx(this.color));
         double d = this.radius * 2.0;
         g.fillOval(this.center.getX() - this.radius,
-            this.center.getY() - this.radius,
-            d, d);
+            this.center.getY() - this.radius, d, d);
     }
 
     /**
@@ -96,7 +87,7 @@ public class Ball implements Sprite {
      * @param v the velocity to be assigned to the ball
      */
     public void setVelocity(Velocity v) {
-        this.velocity = v;
+        this.velocity = v; 
     }
 
     /**
@@ -106,7 +97,7 @@ public class Ball implements Sprite {
      * @param dy the change in y direction
      */
     public void setVelocity(double dx, double dy) {
-        this.velocity = new Velocity(dx, dy);
+        this.velocity = new Velocity(dx, dy); 
     }
 
     /**
@@ -125,18 +116,14 @@ public class Ball implements Sprite {
      * @param g the game to which this sprite will be added.
      *          This game will manage the sprite and include it in its sprite collection.
      */
-    public void addToGame(ArkanoidGame g) {
-        g.addSprite(this);
-    }
+    public void addToGame(ArkanoidGame g) { g.addSprite(this); }
 
     /**
      * Returns the current velocity of the ball.
      *
      * @return a new geometry.Velocity object representing the ball's velocity
      */
-    public Velocity getVelocity() {
-        return new Velocity(this.velocity.getDx(), this.velocity.getDy());
-    }
+    public Velocity getVelocity() { return new Velocity(this.velocity.getDx(), this.velocity.getDy()); }
 
     /**
      * Generates a random velocity based on the balls size.
@@ -177,9 +164,7 @@ public class Ball implements Sprite {
      * sets the balls color.
      * @param color to this color.
      */
-    public void setColor(Color color) {
-        this.color = color;
-    }
+    public void setColor(Color color) { this.color = color; }
 
     /**
      * Moves the ball one step forward based on its current velocity.
