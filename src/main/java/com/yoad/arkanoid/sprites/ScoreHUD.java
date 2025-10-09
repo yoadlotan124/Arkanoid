@@ -2,7 +2,6 @@ package com.yoad.arkanoid.sprites;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 
 import com.yoad.arkanoid.events.Counter;
 import com.yoad.arkanoid.game.ArkanoidGame;

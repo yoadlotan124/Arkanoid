@@ -21,7 +21,7 @@ public class Ball implements Sprite {
 
     private Point center;
     private final int radius;
-    private Color fxColor;
+    private Color color;
     private Velocity velocity;
     private World environment;
 
@@ -31,10 +31,10 @@ public class Ball implements Sprite {
 
     //---------- Constructor & Getters/Setters ----------
 
-    public Ball(Point center, int r, Color fxColor, World environment) {
+    public Ball(Point center, int r, Color color, World environment) {
         this.center = center;
         this.radius = r;
-        this.fxColor = (fxColor != null ? fxColor : Color.WHITE);
+        this.color = (color != null ? color : Color.WHITE);
         this.velocity = new Velocity(0, 0);
         this.environment = environment;
     }
@@ -42,13 +42,13 @@ public class Ball implements Sprite {
     public int getX() { return (int) this.center.getX(); }
     public int getY() { return (int) this.center.getY(); }
     public int getSize() { return this.radius; }
-    public Color getColor() { return this.fxColor; }
+    public Color getColor() { return this.color; }
     public Velocity getVelocity() { return new Velocity(this.velocity.getDx(), this.velocity.getDy()); }
 
     public void setVelocity(Velocity v) { this.velocity = v; }
     public void setVelocity(double dx, double dy) { this.velocity = new Velocity(dx, dy); }
     public void setEnvironment(World env) { this.environment = env; }
-    public void setColor(Color fx) { if (fx != null) this.fxColor = fx; }
+    public void setColor(Color color) { if (color != null) this.color = color; }
 
     public void addToGame(ArkanoidGame g) { g.addSprite(this); }
     public void removeFromGame(ArkanoidGame g) { g.removeSprite(this); }
@@ -142,7 +142,7 @@ public class Ball implements Sprite {
 
         // actual ball
         double d = this.radius * 2.0;
-        g.setFill(this.fxColor);
+        g.setFill(this.color);
         g.fillOval(this.center.getX() - this.radius, this.center.getY() - this.radius, d, d);
     }
 
