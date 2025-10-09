@@ -21,8 +21,16 @@ import javafx.scene.input.KeyCode;
 
 import java.util.Objects;
 
+import com.yoad.arkanoid.powerups.PowerUp;
+import com.yoad.arkanoid.powerups.PowerUpType;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+
 import com.yoad.arkanoid.ui.MenuButton;
-import static com.yoad.arkanoid.ui.UIUtils.*;
 import static com.yoad.arkanoid.game.Dimensions.*;
 
 /**
@@ -31,12 +39,16 @@ import static com.yoad.arkanoid.game.Dimensions.*;
  */
 public class ArkanoidGame {
 
-    private final SpriteCollection sprites = new SpriteCollection();
-    private final World environment = new World();
+    private SpriteCollection sprites = new SpriteCollection();
+    private World environment = new World();
     private final GameConfig config;
 
     // Primary controllable entities
     private Paddle paddle;
+
+    // Save original size and speed for reverting
+    private int basePaddleWidth;
+    private int basePaddleSpeed;
 
     // Input (fed from JavaFX Scene events)
     private volatile boolean keyLeft  = false;
@@ -54,19 +66,24 @@ public class ArkanoidGame {
     private double mouseX = -1, mouseY = -1; // for hover
 
     // Game accounting
-    private final Counter blockCounter = new Counter();
-    private final Counter ballCounter  = new Counter();
-    private final Counter score        = new Counter();
+    private Counter blockCounter = new Counter();
+    private Counter ballCounter  = new Counter();
+    private Counter score        = new Counter();
 
-    private final BlockRemover blockRemover = new BlockRemover(this, blockCounter, score);
-    private final BallRemover  ballRemover  = new BallRemover(this, ballCounter);
-    private final ScoreTrackingListener scoreTracker = new ScoreTrackingListener(score);
+    private BlockRemover blockRemover = new BlockRemover(this, blockCounter, score);
+    private BallRemover  ballRemover  = new BallRemover(this, ballCounter);
+    private ScoreTrackingListener scoreTracker = new ScoreTrackingListener(score);
+
+    // power-ups
+    private final List<PowerUp> powerUps = new ArrayList<>();
+    private final Map<PowerUpType, Long> effectExpiryNs = new EnumMap<>(PowerUpType.class);
+    private final Random rng = new Random();
 
     // End state
     private boolean finished = false;
     private String endMessage = "";
 
-    //constructor for game config (difficulty etc...)
+    // constructor for game config (difficulty etc...)
     public ArkanoidGame() {
         this(new GameConfig());
     }
@@ -107,23 +124,17 @@ public class ArkanoidGame {
         Rectangle r = new Rectangle(sx(357), sx(576), sx(94), sx(12));
         paddle = new Paddle(r);
         paddle.addToGame(this);
+        basePaddleWidth = paddle.getCollisionRectangle().getWidth();
+        basePaddleSpeed = paddle.getSpeed();
 
         // Balls
         double s = config.ballSpeed();
 
-        Ball ball1 = new Ball(new Point(sx(200), sx(400)), sx(6), java.awt.Color.WHITE, this.environment);
-        ball1.setVelocity( s, -s);
-        ball1.addToGame(this);
+        Ball ball = new Ball(new Point(sx(200), sx(400)), sx(6), java.awt.Color.WHITE, this.environment);
+        ball.setVelocity( s, -s);
+        ball.addToGame(this);
 
-        Ball ball2 = new Ball(new Point(sx(400), sx(420)), sx(6), java.awt.Color.WHITE, this.environment);
-        ball2.setVelocity(-s, -s);
-        ball2.addToGame(this);
-
-        Ball ball3 = new Ball(new Point(sx(600), sx(410)), sx(6), java.awt.Color.WHITE, this.environment);
-        ball3.setVelocity( s, -s);
-        ball3.addToGame(this);
-
-        ballCounter.increase(3);
+        ballCounter.increase(1);
 
         // Bricks (grid)
         int blockWidth  = sx(49);
@@ -223,14 +234,52 @@ public class ArkanoidGame {
                 finished = true;
                 endMessage = "Game Over\nScore: " + score.getValue();
             }
+
+            // update falling power-ups
+            Iterator<PowerUp> it = powerUps.iterator();
+            while (it.hasNext()) {
+                PowerUp p = it.next();
+                p.update(dt);
+                // off-screen bottom → drop
+                if (p.y() > HEIGHT) { it.remove(); continue; }
+                // caught by paddle?
+                if (intersects(p, paddle.getCollisionRectangle())) {
+                    applyPowerUp(p.type);
+                    it.remove();
+                }
+            }
+
+            // expire timed effects
+            long now = System.nanoTime();
+            Long exp = effectExpiryNs.get(PowerUpType.EXPAND_PADDLE);
+            if (exp != null && now >= exp) {
+                setPaddleWidth(basePaddleWidth);          // revert
+                effectExpiryNs.remove(PowerUpType.EXPAND_PADDLE);
+            }
+            // speed expiry
+            Long expS = effectExpiryNs.get(PowerUpType.PADDLE_SPEED);
+            if (expS != null && now >= expS) {
+                paddle.setSpeed(basePaddleSpeed);
+                effectExpiryNs.remove(PowerUpType.PADDLE_SPEED);
+            }
         }
 
         // DRAW
         drawBackground(g);
         sprites.drawAll(g);
 
-        // overlay if paused
-        if (paused) drawPauseOverlay(g);
+        // draw power-ups on top
+        for (PowerUp p : powerUps) {
+            p.draw(g);
+        }
+
+        // draw timers (always visible, even when paused)
+        if (paused) {
+            drawPauseOverlay(g);      // your existing pause panel
+            drawPowerupTimers(g);     // draw on top of overlay
+        } else {
+            drawPowerupTimers(g);
+        }
     }
 
     /**
@@ -279,20 +328,30 @@ public class ArkanoidGame {
     /**
      * End of game - loss/win, optional restart
      */
-    private void restart() {
-        // Clear collections
-        sprites.getSprites().clear();
-        environment.getCollidables().clear();
+    public void restart() {
+        // clear runtime flags
+        paused = false;
         finished = false;
-        endMessage = "";
+        endMessage = null;
 
-        // Reset counters
-        blockCounter.decrease(blockCounter.getValue());
-        ballCounter.decrease(ballCounter.getValue());
-        score.decrease(score.getValue());
+        // clear power-ups and timers
+        powerUps.clear();
+        effectExpiryNs.clear();
 
-        // Rebuild world
-        initialize();
+        // rebuild core containers
+        sprites = new SpriteCollection();
+        environment = new World();
+
+        // reset counters + listeners
+        blockCounter = new Counter();
+        ballCounter  = new Counter();
+        score        = new Counter();
+        blockRemover = new BlockRemover(this, blockCounter, score);
+        ballRemover  = new BallRemover(this, ballCounter);
+        scoreTracker = new ScoreTrackingListener(score);
+
+        // re-create level entities (HUD, paddle, balls, bricks…)
+        initialize(); // this should add fresh HUD/paddle/balls/blocks
     }
 
     /**
@@ -387,6 +446,16 @@ public class ArkanoidGame {
         return ballCounter; 
     }
 
+    private java.util.List<Ball> getBalls() {
+        java.util.ArrayList<Ball> list = new java.util.ArrayList<>();
+        for (Sprite s : this.sprites.getSprites()) {
+            if (s instanceof Ball b) list.add(b);
+        }
+        return list;
+    }
+
+
+    // ------ Helpers for Graphics ------
     private static double textWidth(GraphicsContext g, String s) {
     Text t = new Text(s);
     t.setFont(g.getFont());
@@ -412,6 +481,8 @@ public class ArkanoidGame {
         g.fillText(text, cx - w / 2.0, cy);
     }
 
+    // ------ Helpers for Menu purposes ------
+
     /**
      * returns to the main menu once requested
      * @return true or false depending on if pressed
@@ -420,5 +491,125 @@ public class ArkanoidGame {
         boolean r = returnToMenuRequested;
         returnToMenuRequested = false;
         return r;
+    }
+
+    // ------ Helpers for PowerUps ------
+
+    public void spawnPowerUp(double centerX, double centerY) {
+        int half = sx(12);
+        powerUps.add(new PowerUp(PowerUpType.EXPAND_PADDLE, centerX - half, centerY - half));
+    }
+
+    public void spawnPowerUp(double centerX, double centerY, PowerUpType type) {
+        int half = sx(12);
+        powerUps.add(new PowerUp(type, centerX - half, centerY - half));
+    }
+
+    private boolean intersects(PowerUp p, com.yoad.arkanoid.geometry.Rectangle r) {
+        int rx = r.getStartX(), ry = r.getStartY(), rw = r.getWidth(), rh = r.getHeight();
+        double px = p.x(), py = p.y(); int pw = p.w(), ph = p.h();
+        return px < rx + rw && px + pw > rx && py < ry + rh && py + ph > ry;
+    }
+
+    private void applyPowerUp(PowerUpType type) {
+    switch (type) {
+        case EXPAND_PADDLE -> {
+            setPaddleWidth((int)Math.round(basePaddleWidth * 1.5));
+            effectExpiryNs.put(PowerUpType.EXPAND_PADDLE, System.nanoTime() + (long)(12e9)); // 12s
+        }
+        case PADDLE_SPEED -> {
+            paddle.setSpeed((int)Math.round(basePaddleSpeed * 1.5));
+            effectExpiryNs.put(PowerUpType.PADDLE_SPEED, System.nanoTime() + (long)(10e9)); // 10s
+        }
+        case MULTI_BALL -> {
+            var balls = getBalls();
+            int cap = 8; // total balls max
+            int canAdd = Math.max(0, cap - balls.size());
+            if (canAdd <= 0) return;
+
+            double s = config.ballSpeed(); // same as your first ball
+            int spawned = 0;
+
+            for (Ball b : balls) {
+                if (spawned >= canAdd) break;
+
+                // decide vertical sign: keep current up/down, or force up (-1.0)
+                double signY = (b.getVelocity().getDy() < 0 ? -1.0 : 1.0);
+
+                // spawn up to 2 clones per source ball: one to the right, one to the left
+                int clonesForThis = Math.min(2, canAdd - spawned);
+                for (int i = 0; i < clonesForThis; i++) {
+                    double dx = (i == 0 ? +s : -s);
+                    double dy = signY * s;
+
+                    // nudge start so it doesn’t overlap the source ball
+                    double offset = b.getSize() + sx(2);
+                    double ox = (i == 0 ? +offset : -offset);
+                    double oy = -offset;
+
+                    Ball nb = new Ball(
+                        new Point(b.getX() + ox, b.getY() + oy),
+                        b.getSize(),
+                        b.getColor(),
+                        this.environment
+                    );
+                    nb.setVelocity(dx, dy);     // EXACTLY like your initial spawn (±s, -s)
+                    nb.addToGame(this);
+
+                    ballCounter.increase(1);
+                    spawned++;
+                    if (spawned >= canAdd) break;
+                }
+            }
+        }
+    }
+}
+
+
+    private void setPaddleWidth(int newWidth) {
+        // delegate to Paddle
+        paddle.scaleWidthTo(newWidth);
+    }
+
+    /** Draw active power-up timers (top-left). */
+    private void drawPowerupTimers(GraphicsContext g) {
+        if (effectExpiryNs.isEmpty()) return;
+
+        double x = sx(12), y = sx(12);
+        double w = sx(180), h = sx(28), r = sx(10);
+        long now = System.nanoTime();
+
+        for (var entry : effectExpiryNs.entrySet()) {
+            var type = entry.getKey();
+            long expNs = entry.getValue();
+            double remaining = Math.max(0.0, (expNs - now) / 1_000_000_000.0);
+
+            // style per effect
+            Color base, border; String label;
+            switch (type) {
+                case EXPAND_PADDLE -> {
+                    base = Color.web("#22c55e"); border = Color.web("#16a34a"); label = "Expand";
+                }
+                case PADDLE_SPEED -> {
+                    base = Color.web("#f59e0b"); border = Color.web("#d97706"); label = "Speed";
+                }
+                default -> {
+                    base = Color.web("#64748b"); border = Color.web("#475569"); label = type.name();
+                }
+            }
+
+            g.setFill(base.deriveColor(0, 1, 1, 0.92));
+            fillRoundRect(g, x, y, w, h, r);
+            g.setStroke(border);
+            g.setLineWidth(1.0);
+            strokeRoundRect(g, x, y, w, h, r);
+
+            g.setFill(Color.WHITE);
+            g.setFont(Font.font(14 * SCALE));
+            String text = label + "  " + String.format("%.1fs", remaining);
+            g.fillText(text, x + sx(12), y + h / 2.0 + sx(5));
+
+            y += h + sx(8); // stack vertically
+        }
     }
 }

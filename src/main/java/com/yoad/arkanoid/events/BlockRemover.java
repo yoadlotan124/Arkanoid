@@ -4,6 +4,8 @@ import com.yoad.arkanoid.game.Brick;
 import com.yoad.arkanoid.game.ArkanoidGame;
 import com.yoad.arkanoid.sprites.Ball;
 
+import java.util.Random;
+
 /**
  * The {@code BlockRemover} class is responsible for removing blocks from the game
  * when they are hit, and for keeping track of the number of remaining blocks using a {@link Counter}.
@@ -14,6 +16,9 @@ public class BlockRemover implements HitListener {
     private ArkanoidGame game;
     private Counter remainingBlocks;
     private Counter scoreCounter;
+
+    // Power ups spawner purposes
+    private final Random rng = new Random();
 
     /**
      * Constructs a new BlockRemover.
@@ -39,8 +44,20 @@ public class BlockRemover implements HitListener {
         beingHit.removeFromGame(game);
         beingHit.removeHitListener(this);
         remainingBlocks.decrease(1);
-        if (remainingBlocks.getValue() == 0) {
-            scoreCounter.increase(100); // Bonus for clearing all blocks
+        // ~25% drop chance
+        if (rng.nextDouble() < 0.25) {
+            var rect = beingHit.getCollisionRectangle();
+            double cx = rect.getStartX() + rect.getWidth() / 2.0;
+            double cy = rect.getStartY() + rect.getHeight() / 2.0;
+
+            // weighted choice: 40% SIZE, 20% MULTI, 40% SPEED
+            double r = rng.nextDouble();
+            com.yoad.arkanoid.powerups.PowerUpType type =
+                (r < 0.4) ? com.yoad.arkanoid.powerups.PowerUpType.EXPAND_PADDLE :
+                (r < 0.6) ? com.yoad.arkanoid.powerups.PowerUpType.MULTI_BALL :
+                            com.yoad.arkanoid.powerups.PowerUpType.PADDLE_SPEED;
+
+            game.spawnPowerUp(cx, cy, type); // overload spawnPowerUp to accept a type
         }
     }
 }

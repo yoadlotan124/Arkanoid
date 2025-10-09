@@ -27,7 +27,7 @@ public class Paddle implements Sprite, Collidable {
     private boolean rightPressed = false;
 
     // Movement tuning
-    private static final int SPEED = sx(6);;
+    private int speed = sx(6);;
 
     /**
      * Constructs a new sprites.Paddle object with a specified rectangle.
@@ -35,6 +35,12 @@ public class Paddle implements Sprite, Collidable {
      * @param keyboard
      */
     public Paddle(Rectangle rectangle) { this.rectangle = rectangle; }
+
+    /**
+     * Getters and setters
+     */
+    public int getSpeed() { return speed; }
+    public void setSpeed(int speed) { this.speed = Math.max(1, speed); }
 
     /** Let the game feed input state each frame (e.g., from JavaFX key handlers). */
     public void setInput(boolean left, boolean right) {
@@ -46,7 +52,7 @@ public class Paddle implements Sprite, Collidable {
      * Moves the paddle to the left by 5 units.
      */
     public void moveLeft() {
-        rectangle.move(-SPEED);
+        rectangle.move(-speed);
         if (rectangle.getStartX() <= -sx(50)) {
             rectangle.move(sx(862)); // 862 * 1.5 preserves prior wrap behavior
         }
@@ -56,7 +62,7 @@ public class Paddle implements Sprite, Collidable {
      * Moves the paddle to the right by 5 units.
      */
     public void moveRight() {
-        rectangle.move(SPEED);
+        rectangle.move(speed);
         if (rectangle.getStartX() >= sx(760)) {
             rectangle.move(-sx(862));
         }
@@ -153,5 +159,24 @@ public class Paddle implements Sprite, Collidable {
     public void addToGame(ArkanoidGame g) {
         g.addSprite(this    );
         g.addCollidable(this);
+    }
+
+    //-----PowerUps-----
+
+    public void scaleWidth(double factor) {
+        int target = (int)Math.round(this.rectangle.getWidth() * factor);
+        scaleWidthTo(target);
+    }
+
+    public void scaleWidthTo(int newWidth) {
+        int oldW = this.rectangle.getWidth();
+        int cx = this.rectangle.getStartX() + oldW / 2;
+        int newStartX = cx - newWidth / 2;
+        // Recreate the rectangle with new width, same Y/height
+        this.rectangle = new com.yoad.arkanoid.geometry.Rectangle(
+            new com.yoad.arkanoid.geometry.Point(newStartX, this.rectangle.getStartY()),
+            newWidth,
+            this.rectangle.getHeight()
+        );
     }
 }
