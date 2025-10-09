@@ -11,7 +11,7 @@ import static com.yoad.arkanoid.game.Dimensions.sx;
 public final class TextFx {
     private TextFx() {}
 
-    // --- helpers to measure text without getFontMetrics ---
+    // --- helpers to measure ---
     private static double textWidth(GraphicsContext g, String s) {
         Text t = new Text(s);
         t.setFont(g.getFont());
@@ -19,7 +19,6 @@ public final class TextFx {
     }
 
     private static double fontHeight(GraphicsContext g) {
-        // simple approximation: JavaFX Font “em” height is close to getSize()
         return g.getFont().getSize();
     }
 

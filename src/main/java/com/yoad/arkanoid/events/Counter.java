@@ -5,40 +5,17 @@ package com.yoad.arkanoid.events;
  * It allows increasing, decreasing, and retrieving the current value of the count.
  */
 public class Counter {
-    // Fields
+    //---------- Fields ----------
+
     private int counter;
 
-    /**
-     * Constructs a new Counter initialized to zero.
-     */
-    public Counter() {
-        this.counter = 0;
-    }
+    //---------- Constructor & Getters/Setters ----------
 
-    /**
-     * Adds the specified number to the current count.
-     *
-     * @param number the number to add.
-     */
-    public void increase(int number) {
-        counter += number;
-    }
+    public Counter() { this.counter = 0; }
 
-    /**
-     * Subtracts the specified number from the current count.
-     *
-     * @param number the number to subtract.
-     */
-    public void decrease(int number) {
-        counter -= number;
-    }
+    public void increase(int number) { counter += number; }
 
-    /**
-     * Returns the current count value.
-     *
-     * @return the current count.
-     */
-    public int getValue() {
-        return counter;
-    }
+    public void decrease(int number) { counter -= number; }
+
+    public int getValue() { return counter; }
 }

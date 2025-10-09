@@ -14,11 +14,11 @@ public final class Backgrounds {
 
     // themed vertical gradient
     LinearGradient base = switch (theme) {
-      case OCEAN -> lg("#0ea5e9", "#1e40af");   // sky → indigo
-      case SUNSET -> lg("#fb923c", "#7c2d12");  // orange → deep brown
-      case NEON -> lg("#06b6d4", "#7c3aed");    // cyan → violet
-      case FOREST -> lg("#22c55e", "#065f46");  // green → deep teal
-      case MONO -> lg("#9ca3af", "#111827");    // gray → near black
+      case OCEAN -> lg("#0ea5e9", "#1e40af");   // sky -> indigo
+      case SUNSET -> lg("#fb923c", "#7c2d12");  // orange -> deep brown
+      case NEON -> lg("#06b6d4", "#7c3aed");    // cyan -> violet
+      case FOREST -> lg("#22c55e", "#065f46");  // green-> deep teal
+      case MONO -> lg("#9ca3af", "#111827");    // gray -> near black
     };
 
     g.setFill(base);

@@ -2,7 +2,9 @@ package com.yoad.arkanoid.config;
 
 import static com.yoad.arkanoid.game.Dimensions.*;
 
-/** Runtime config chosen from the main menu. */
+/**
+ * Runtime config chosen from the main menu.
+ */
 public final class GameConfig {
 
     /** Gameplay difficulty scales. */
@@ -20,15 +22,17 @@ public final class GameConfig {
         public int rowDelta()      { return rowDelta; }
     }
 
-    // --- chosen values (defaults) ---
+    //---------- Fields ----------
+
     private Difficulty difficulty = Difficulty.NORMAL;
     private Theme theme = Theme.OCEAN; // default theme
 
-    // --- base layout (before difficulty deltas) ---
+    // base layout (before difficulty deltas)
     private static final int BASE_ROWS = 6;
     private static final int BASE_COLS = 12;
 
-    // --- difficulty ---
+    //---------- Difficulty ----------
+
     public Difficulty getDifficulty()       { return difficulty; }
     public void setDifficulty(Difficulty d) { if (d != null) difficulty = d; }
 
@@ -72,7 +76,7 @@ public final class GameConfig {
     /** Rows after difficulty delta (min 3). */
     public int rows() { return Math.max(3, BASE_ROWS + difficulty.rowDelta()); }
 
-    /** Columns are fixed by design (triangle layout shrinks per row in your init). */
+    /** Columns are fixed by design */
     public int cols() { return BASE_COLS; }
 
     /** Base ball speed (≈3 px/tick), scaled by resolution + difficulty. */

@@ -13,40 +13,24 @@ import java.util.List;
  * Environment of the game, meaning the rectangles to collide with and such.
  */
 public class World {
-    // Fields
+    //---------- Fields ----------
+
     private final Rectangle screen;
     private final List<Collidable> collidables;
 
-    /**
-     * Constructor for the game environment.
-     */
+    //---------- Constructor & Getters/Setters ----------
+
     public World() {
         screen = new Rectangle(28, 28, 772, 572);
         collidables = new ArrayList<>();
     }
 
-    /**
-     * @return screen.
-     */
-    public Rectangle getScreen() {
-        return screen;
-    }
+    public Rectangle getScreen() { return screen; }
+    public List<Collidable> getCollidables() { return collidables; }
 
-    /**
-     * @return collidables list.
-     */
-    public List<Collidable> getCollidables() {
-        return collidables;
-    }
+    public void addCollidable(Collidable c) { collidables.add(c); }
 
-    /**
-     * Adds the given collidable to the environment.
-     *
-     * @param c the collidable object to add
-     */
-    public void addCollidable(Collidable c) {
-        collidables.add(c);
-    }
+    //---------- World's Logic ----------
 
     /**
      * Assume an object moving from line.start() to line.end().

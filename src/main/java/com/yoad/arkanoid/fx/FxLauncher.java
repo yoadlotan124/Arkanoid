@@ -17,14 +17,16 @@ import com.yoad.arkanoid.ui.Backgrounds;
 import com.yoad.arkanoid.ui.MenuButton;
 import static com.yoad.arkanoid.ui.UIUtils.drawCentered;
 
-import com.yoad.arkanoid.audio.Sounds;
 import com.yoad.arkanoid.config.GameConfig;
 
 import static com.yoad.arkanoid.game.Dimensions.*;
 
 
-/** Boots JavaFX and drives the game loop via AnimationTimer. */
+/** 
+ * Boots JavaFX and drives the game loop via AnimationTimer.
+ */
 public class FxLauncher extends Application {
+    //---------- Fields ----------
 
     private enum UiState { MENU, GAME }
     private UiState state = UiState.MENU;
@@ -43,10 +45,11 @@ public class FxLauncher extends Application {
 
     private long lastNs = 0;
 
-    // fields in FxLauncher (top of class)
-    private long lastPressNs = 0;
-    private static final long CLICK_DEBOUNCE_NS = 180_000_000L; // 180ms
+    //---------- FxLauncher's Logic ----------
 
+    /*
+     * Startup Main menu pull up
+     */
     @Override
     public void start(Stage stage) {
         canvas = new Canvas(WIDTH, HEIGHT);
@@ -68,20 +71,7 @@ public class FxLauncher extends Application {
             if (state == UiState.MENU) handleMenuClick(e.getX(), e.getY());
             else if (state == UiState.GAME && game != null) game.onMouseClicked(e.getX(), e.getY());
         });
-        
-        // #Not working for now
 
-        // scene.setOnMousePressed(e -> {
-        //     double x = e.getX(), y = e.getY();
-        //     if (state == UiState.MENU) {
-        //         // play first so sound is not lost if state changes
-        //         Sounds.CLICK.play();
-        //         handleMenuClick(x, y);  // your existing method
-        //     } else if (state == UiState.GAME && game != null) {
-        //         // if you have pause-menu buttons, you can route here too
-        //         Sounds.CLICK.play();
-        //     }
-        // });
         scene.setOnKeyPressed(e -> {
             if (state == UiState.GAME && game != null) game.onKeyChanged(e.getCode(), true);
         });

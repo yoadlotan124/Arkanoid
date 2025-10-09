@@ -4,6 +4,7 @@ import com.yoad.arkanoid.game.Brick;
 import com.yoad.arkanoid.audio.Sounds;
 import com.yoad.arkanoid.game.ArkanoidGame;
 import com.yoad.arkanoid.sprites.Ball;
+import com.yoad.arkanoid.powerups.PowerUpType;
 
 import java.util.Random;
 
@@ -14,34 +15,33 @@ import java.util.Random;
  * as a listener to any block that should be removed upon being hit.
  */
 public class BlockRemover implements HitListener {
+    //---------- Fields ----------
+
     private ArkanoidGame game;
     private Counter remainingBlocks;
-    private Counter scoreCounter;
 
     // Power ups spawner purposes
     private final Random rng = new Random();
 
-    /**
-     * Constructs a new BlockRemover.
-     * @param game the {@link ArkanoidGame} instance from which blocks will be removed.
-     * @param remainingBlocks a {@link Counter} that keeps track of remaining blocks.
-     * @param scoreCounter score counter.
-     */
+    //---------- Constructor & Getters/Setters ----------
+
     public BlockRemover(ArkanoidGame game, Counter remainingBlocks, Counter scoreCounter) {
         this.game = game;
         this.remainingBlocks = remainingBlocks;
-        this.scoreCounter = scoreCounter;
     }
+
+    //---------- BlockRemover's Logic ----------
 
     /**
      * Called whenever a block is hit. Removes the block from the game,
      * unregisters this listener from it, and decreases the block count.
+     * also responsible for PowerUp random and decide.
      * @param beingHit the {@link Brick} that was hit.
      * @param hitter the {@link Ball} that hit the block.
      */
     @Override
     public void hitEvent(Brick beingHit, Ball hitter) {
-        hitter.setFxColor(beingHit.getColor());
+        hitter.setColor(beingHit.getColor());
         beingHit.removeFromGame(game);
         beingHit.removeHitListener(this);
         remainingBlocks.decrease(1);
@@ -55,10 +55,10 @@ public class BlockRemover implements HitListener {
 
             // weighted choice: 40% SIZE, 20% MULTI, 40% SPEED
             double r = rng.nextDouble();
-            com.yoad.arkanoid.powerups.PowerUpType type =
-                (r < 0.4) ? com.yoad.arkanoid.powerups.PowerUpType.EXPAND_PADDLE :
-                (r < 0.6) ? com.yoad.arkanoid.powerups.PowerUpType.MULTI_BALL :
-                            com.yoad.arkanoid.powerups.PowerUpType.PADDLE_SPEED;
+            PowerUpType type =
+                (r < 0.4) ? PowerUpType.EXPAND_PADDLE :
+                (r < 0.6) ? PowerUpType.MULTI_BALL :
+                            PowerUpType.PADDLE_SPEED;
 
             game.spawnPowerUp(cx, cy, type); // overload spawnPowerUp to accept a type
         }
