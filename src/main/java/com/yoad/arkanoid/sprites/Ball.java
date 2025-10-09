@@ -1,8 +1,7 @@
 package com.yoad.arkanoid.sprites;
-import com.yoad.arkanoid.game.World;
-import com.yoad.arkanoid.game.ArkanoidGame;
 
-import javafx.scene.canvas.GraphicsContext;
+import com.yoad.arkanoid.game.ArkanoidGame;
+import com.yoad.arkanoid.game.World;
 import com.yoad.arkanoid.geometry.Line;
 import com.yoad.arkanoid.geometry.Point;
 import com.yoad.arkanoid.geometry.Rectangle;
@@ -10,7 +9,12 @@ import com.yoad.arkanoid.geometry.Velocity;
 import com.yoad.arkanoid.physics.CollisionInfo;
 import com.yoad.arkanoid.fx.FxColors;
 
-import java.awt.Color;
+import javafx.geometry.Point2D;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Random;
 
 /**
@@ -21,9 +25,13 @@ public class Ball implements Sprite {
     // Fields
     private Point center;
     private final int radius;
-    private Color color;
+    private Color fxColor;
     private Velocity velocity;
     private World environment;
+
+    private final Deque<Point2D> trail = new ArrayDeque<>(12);
+    private static final int TRAIL_LEN = 8;
+    private static final double TRAIL_ALPHA = 0.18;
 
     /**
      * Constructs a sprites.Ball object with a specified center point, radius, and color.
@@ -33,10 +41,21 @@ public class Ball implements Sprite {
      * @param color  the color of the ball
      * @param environment the balls environment
      */
-    public Ball(Point center, int r, java.awt.Color color, World environment) {
+    public Ball(Point center, int r, java.awt.Color awtColor, World environment) {
         this.center = center;
         this.radius = r;
-        this.color = color;
+        this.fxColor = FxColors.toFx(awtColor);
+        this.velocity = new Velocity(0, 0);
+        this.environment = environment;
+    }
+
+    /**
+     * Overload: Constructs a Ball with JavaFX color directly.
+     */
+    public Ball(Point center, int r, Color fxColor, World environment) {
+        this.center = center;
+        this.radius = r;
+        this.fxColor = (fxColor != null ? fxColor : Color.WHITE);
         this.velocity = new Velocity(0, 0);
         this.environment = environment;
     }
@@ -66,7 +85,10 @@ public class Ball implements Sprite {
      * returns this balls color.
      * @return color.
      */
-    public Color getColor() { return this.color; }
+    public java.awt.Color getColor() { return FxColors.toAwt(this.fxColor); }
+
+    /** Preferred getter for rendering/styling in JavaFX code. */
+    public Color getFxColor() { return this.fxColor; }
 
     /**
      * Draws the ball on the specified Surface.
@@ -75,10 +97,28 @@ public class Ball implements Sprite {
      */
     @Override
     public void draw(GraphicsContext g) {
-        g.setFill(FxColors.toFx(this.color));
+        // (optional) trail: comment this block out if you didn't add the trail
+        pushTrail();
+        if (!trail.isEmpty()) {
+            Point2D[] pts = trail.toArray(new Point2D[0]);
+            for (int i = 0; i < pts.length; i++) {
+                double t = 1.0 - (i / (double) TRAIL_LEN);
+                double alpha = TRAIL_ALPHA * t;
+                double r = getSize() * (0.75 + 0.25 * t);
+                g.setFill(Color.color(1, 1, 1, alpha));
+                g.fillOval(pts[i].getX() - r, pts[i].getY() - r, r * 2, r * 2);
+            }
+        }
+
+        // actual ball
         double d = this.radius * 2.0;
-        g.fillOval(this.center.getX() - this.radius,
-            this.center.getY() - this.radius, d, d);
+        g.setFill(this.fxColor);
+        g.fillOval(this.center.getX() - this.radius, this.center.getY() - this.radius, d, d);
+    }
+
+    private void pushTrail() {
+        trail.addFirst(new Point2D(getX(), getY()));
+        while (trail.size() > TRAIL_LEN) trail.removeLast();
     }
 
     /**
@@ -164,7 +204,10 @@ public class Ball implements Sprite {
      * sets the balls color.
      * @param color to this color.
      */
-    public void setColor(Color color) { this.color = color; }
+    public void setColor(java.awt.Color awt) { this.fxColor = FxColors.toFx(awt); }
+
+    /** Set color from JavaFX (preferred). */
+    public void setFxColor(Color fx) { if (fx != null) this.fxColor = fx; }
 
     /**
      * Moves the ball one step forward based on its current velocity.

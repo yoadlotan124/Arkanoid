@@ -6,6 +6,8 @@ import javafx.scene.text.Font;
 
 import com.yoad.arkanoid.events.Counter;
 import com.yoad.arkanoid.game.ArkanoidGame;
+import com.yoad.arkanoid.ui.TextFx;
+import com.yoad.arkanoid.ui.Typography;
 
 import static com.yoad.arkanoid.game.Dimensions.*;
 
@@ -35,9 +37,9 @@ public class ScoreHUD implements Sprite {
      */
     @Override
     public void draw(GraphicsContext g) {
-        g.setFill(Color.WHITE);
-        g.setFont(Font.font(18 * SCALE));
-        g.fillText("Score: " + currentScore.getValue(), sx(350), sx(60));
+        // centered pill "Score: N"
+        String text = "Score: " + currentScore.getValue();
+        TextFx.pill(g, text, WIDTH / 2.0, sx(18), Typography.title(), Color.color(0,0,0,0.45), Color.WHITE);
     }
 
     /**

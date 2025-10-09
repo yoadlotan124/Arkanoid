@@ -24,6 +24,8 @@ public class Brick implements Collidable, Sprite, HitNotifier {
     private final Color color;
     private List<HitListener> hitListeners;
 
+    private long flashUntilNs = 0L;
+
     /**
      * constructor for the class.
      * @param rect represents our block
@@ -54,11 +56,42 @@ public class Brick implements Collidable, Sprite, HitNotifier {
      */
     @Override
     public void draw(javafx.scene.canvas.GraphicsContext g) {
-        Rectangle r = this.getCollisionRectangle();
-        g.setFill(FxColors.toFx(this.color));
-        g.fillRect(r.getStartX(), r.getStartY(), r.getWidth(), r.getHeight());
-        g.setStroke(javafx.scene.paint.Color.BLACK);
-        g.strokeRect(r.getStartX(), r.getStartY(), r.getWidth(), r.getHeight());
+        var r = this.getCollisionRectangle();
+        double x = r.getStartX(), y = r.getStartY(), w = r.getWidth(), h = r.getHeight();
+
+        // Corner radius (nice & rounded)
+        double rad = Math.min(w, h) * 0.32;
+
+        // Convert AWT -> FX
+        javafx.scene.paint.Color base = javafx.scene.paint.Color.rgb(
+            color.getRed(), color.getGreen(), color.getBlue()
+        );
+
+        // Optional: don't flash the gray walls
+        boolean isWall = (color.equals(java.awt.Color.GRAY));
+
+        // Hit flash — brighten briefly
+        double bright = (!isWall && System.nanoTime() < flashUntilNs) ? 1.25 : 1.0;
+        javafx.scene.paint.Color body = javafx.scene.paint.Color.color(
+            clamp01(base.getRed()   * bright),
+            clamp01(base.getGreen() * bright),
+            clamp01(base.getBlue()  * bright)
+        );
+
+        // Fill
+        g.setFill(body);
+        g.fillRoundRect(x, y, w, h, rad, rad);
+
+        // Soft top-left highlight
+        g.setStroke(body.brighter().brighter());
+        g.setLineWidth(1.2);
+        g.strokeLine(x + 3, y + 3, x + w * 0.65, y + 3);
+        g.strokeLine(x + 3, y + 3, x + 3,        y + h * 0.65);
+
+        // Subtle border
+        g.setStroke(javafx.scene.paint.Color.color(0, 0, 0, 0.35));
+        g.setLineWidth(1.0);
+        g.strokeRoundRect(x + 0.5, y + 0.5, w - 1, h - 1, rad, rad);
     }
 
     /**
@@ -77,6 +110,9 @@ public class Brick implements Collidable, Sprite, HitNotifier {
      */
     @Override
     public Velocity hit(Ball hitter, Point collisionPoint, Velocity currentVelocity) {
+
+        flashUntilNs = System.nanoTime() + (long) (120e6);
+
         double dx = currentVelocity.getDx();
         double dy = currentVelocity.getDy();
 
@@ -169,4 +205,7 @@ public class Brick implements Collidable, Sprite, HitNotifier {
     public Color getColor() {
         return color;
     }
+
+    // helper
+    private static double clamp01(double v) { return v < 0 ? 0 : (v > 1 ? 1 : v); }
 }

@@ -1,6 +1,7 @@
 package com.yoad.arkanoid.game;
 
 import com.yoad.arkanoid.audio.Sounds;
+import com.yoad.arkanoid.config.GameConfig;
 import com.yoad.arkanoid.events.BallRemover;
 import com.yoad.arkanoid.events.BlockRemover;
 import com.yoad.arkanoid.events.Counter;
@@ -29,9 +30,11 @@ import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
+import com.yoad.arkanoid.ui.Backgrounds;
 import com.yoad.arkanoid.ui.MenuButton;
+import com.yoad.arkanoid.ui.ThemePalettes;
+
 import static com.yoad.arkanoid.game.Dimensions.*;
 
 /**
@@ -54,9 +57,7 @@ public class ArkanoidGame {
     // Input (fed from JavaFX Scene events)
     private volatile boolean keyLeft  = false;
     private volatile boolean keyRight = false;
-    private volatile boolean keySpace = false; // kept for future use
-    private volatile boolean keyEsc   = false; // kept for future use
-    private volatile boolean keyEnter = false; // kept for future/menu use
+    private volatile boolean keyEnter = false;
 
     // Pause state
     private boolean paused = false;
@@ -64,7 +65,6 @@ public class ArkanoidGame {
     // Pause menu buttons
     private MenuButton btnResume, btnRestart, btnLobby;
     private boolean returnToMenuRequested = false;
-    private double mouseX = -1, mouseY = -1; // for hover
 
     // Game accounting
     private Counter blockCounter = new Counter();
@@ -78,7 +78,6 @@ public class ArkanoidGame {
     // power-ups
     private final List<PowerUp> powerUps = new ArrayList<>();
     private final Map<PowerUpType, Long> effectExpiryNs = new EnumMap<>(PowerUpType.class);
-    private final Random rng = new Random();
 
     // End state
     private boolean finished = false;
@@ -121,53 +120,66 @@ public class ArkanoidGame {
         // HUD
         new ScoreHUD(score).addToGame(this);
 
-        // Paddle
-        Rectangle r = new Rectangle(sx(357), sx(576), sx(94), sx(12));
+        // Paddle — anchor from the bottom, not a magic number
+        Rectangle r = new Rectangle(sx(357), HEIGHT - sx(24), sx(94), sx(12));
         paddle = new Paddle(r);
         paddle.addToGame(this);
         basePaddleWidth = paddle.getCollisionRectangle().getWidth();
         basePaddleSpeed = paddle.getSpeed();
 
-        // Balls
+        // Balls (good as-is)
         double s = config.ballSpeed();
-
-        Ball ball = new Ball(new Point(sx(200), sx(400)), sx(6), java.awt.Color.WHITE, this.environment);
-        ball.setVelocity( s, -s);
+        Ball ball = new Ball(new Point(sx(200), sx(360)), sx(6), java.awt.Color.WHITE, this.environment);
+        ball.setVelocity(s, -s);
         ball.addToGame(this);
-
         ballCounter.increase(1);
 
-        // Bricks (grid)
+        // Bricks (grid) — scale the ORIGIN too (not just sizes)
         int blockWidth  = sx(49);
         int blockHeight = sx(23);
         int rows = config.rows();
         int cols = config.cols();
 
-        java.awt.Color[] colors = config.getTheme().palette();
+        // 800×600-era origin was ~ (xRight=751, yTop=150)
+        int startXRight = sx(751);
+        int startY      = sx(150);
+
+        var colors = ThemePalettes.palette(config.theme());
 
         for (int row = 0; row < rows; row++) {
-            java.awt.Color currentColor = colors[row % colors.length];
+            javafx.scene.paint.Color current = colors[row % colors.length];
+
             for (int col = 0; col < cols; col++) {
-                int x = sx(723) - col * sx(49);
-                int y = sx(150) + row * sx(23);
-                Brick block = new Brick(new Rectangle(new Point(x, y), blockWidth, blockHeight), currentColor);
+                int x = startXRight - col * blockWidth;   // use scaled origin + scaled width
+                int y = startY + row * blockHeight;       // use scaled origin + scaled height
+
+                java.awt.Color awt = new java.awt.Color(
+                    (int)(current.getRed()   * 255),
+                    (int)(current.getGreen() * 255),
+                    (int)(current.getBlue()  * 255)
+                );
+
+                Brick block = new Brick(new Rectangle(new Point(x, y), blockWidth, blockHeight), awt);
                 block.addToGame(this);
                 blockCounter.increase(1);
                 block.addHitListener(blockRemover);
                 block.addHitListener(scoreTracker);
             }
-            cols--; // shrinking row
+            cols--;
         }
 
-        // Walls (top/left/right) + bottom (death)
-        Brick topWall = new Brick(new Rectangle(new Point(0, 0), WIDTH, sx(28)), java.awt.Color.GRAY);
-        topWall.addToGame(this);
-        Brick leftWall = new Brick(new Rectangle(new Point(0, sx(28)), sx(28), HEIGHT - sx(28)), java.awt.Color.GRAY);
-        leftWall.addToGame(this);
-        Brick rightWall = new Brick(new Rectangle(new Point(WIDTH - sx(28), sx(28)), sx(28), HEIGHT - sx(28)), java.awt.Color.GRAY);
-        rightWall.addToGame(this);
-        Brick bottomWall = new Brick(new Rectangle(new Point(sx(28), HEIGHT), WIDTH - sx(56), sx(28)), java.awt.Color.GRAY);
+        // Walls placed just outside the visible canvas (still collidable)
+        int t = sx(28); // wall thickness
+
+        Brick topWall    = new Brick(new Rectangle(new Point(0,   -t),    WIDTH, t), java.awt.Color.GRAY);
+        Brick leftWall   = new Brick(new Rectangle(new Point(-t,   0),     t,     HEIGHT), java.awt.Color.GRAY);
+        Brick rightWall  = new Brick(new Rectangle(new Point(WIDTH, 0),     t,     HEIGHT), java.awt.Color.GRAY);
+        Brick bottomWall = new Brick(new Rectangle(new Point(0,    HEIGHT), WIDTH, t), java.awt.Color.GRAY);
         bottomWall.addHitListener(ballRemover);
+
+        topWall.addToGame(this);
+        leftWall.addToGame(this);
+        rightWall.addToGame(this);
         bottomWall.addToGame(this);
 
         createPauseButtons();
@@ -181,7 +193,6 @@ public class ArkanoidGame {
         switch (code) {
             case LEFT, A -> keyLeft = down;
             case RIGHT, D -> keyRight = down;
-            case SPACE -> keySpace = down;
             case ENTER -> keyEnter = down;
             case ESCAPE -> { if (down) paused = !paused; }
             default -> { /* ignore other keys */ }
@@ -189,7 +200,6 @@ public class ArkanoidGame {
     }
 
     public void onMouseMoved(double x, double y) {
-        mouseX = x; mouseY = y;
         if (!paused) return;
         btnResume.hovered  = btnResume.contains(x, y);
         btnRestart.hovered = btnRestart.contains(x, y);
@@ -274,7 +284,7 @@ public class ArkanoidGame {
         }
 
         // DRAW
-        drawBackground(g);
+        Backgrounds.drawGameBackground(g, config.theme());
         sprites.drawAll(g);
 
         // draw power-ups on top
@@ -296,16 +306,7 @@ public class ArkanoidGame {
      * @param g graphic content on which to draw the background
      */
     private void drawBackground(GraphicsContext g) {
-        var top = config.getTheme().bgTop();
-        var bot = config.getTheme().bgBottom();
-        var grad = new javafx.scene.paint.LinearGradient(
-            0, 0, 0, 1, true,
-            javafx.scene.paint.CycleMethod.NO_CYCLE,
-            new javafx.scene.paint.Stop(0, top),
-            new javafx.scene.paint.Stop(1, bot)
-        );
-        g.setFill(grad);
-        g.fillRect(0, 0, WIDTH, HEIGHT);
+        Backgrounds.drawGameBackground(g, config.theme());
     }
 
     /**
@@ -326,11 +327,11 @@ public class ArkanoidGame {
             y += 36;
         }
         g.setFont(Font.font(sx(18)));
-        g.fillText("Press ENTER to restart", WIDTH / 2.0 - 110, y + 10);
+        g.fillText("Press ENTER to return to the lobby", WIDTH / 2.0 - 175, y + 10);
 
         // Simple restart on ENTER (re-init world)
         if (keyEnter) {
-            restart();
+            returnToMenuRequested = true; paused = false;
         }
     }
 
@@ -466,15 +467,15 @@ public class ArkanoidGame {
 
     // ------ Helpers for Graphics ------
     private static double textWidth(GraphicsContext g, String s) {
-    Text t = new Text(s);
-    t.setFont(g.getFont());
-    return t.getLayoutBounds().getWidth();
+        Text t = new Text(s);
+        t.setFont(g.getFont());
+        return t.getLayoutBounds().getWidth();
     }
 
     private void drawButton(GraphicsContext g, MenuButton b, Color base, Color hover) {
-    // Pause menu uses slightly smaller font + radius than main menu
-    b.draw(g, base, hover, 18 * SCALE, sx(10));
-}
+        // Pause menu uses slightly smaller font + radius than main menu
+        b.draw(g, base, hover, 18 * SCALE, sx(10));
+    }
 
     private void fillRoundRect(GraphicsContext g, double x, double y, double w, double h, double arc) {
         g.fillRoundRect(x, y, w, h, arc, arc);

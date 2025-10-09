@@ -13,11 +13,12 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
-import com.yoad.arkanoid.game.GameConfig;
+import com.yoad.arkanoid.ui.Backgrounds;
 import com.yoad.arkanoid.ui.MenuButton;
 import static com.yoad.arkanoid.ui.UIUtils.drawCentered;
 
 import com.yoad.arkanoid.audio.Sounds;
+import com.yoad.arkanoid.config.GameConfig;
 
 import static com.yoad.arkanoid.game.Dimensions.*;
 
@@ -99,21 +100,22 @@ public class FxLauncher extends Application {
                 lastNs = now;
 
                 if (state == UiState.MENU) {
-                    drawMenu(g);
-                } else {
-                    // lazy init game on first frame after switching state
-                    if (game == null) {
-                        game = new ArkanoidGame(config);
-                        game.initialize();
-                    }
-                    game.tick(g, dt);
-                    if (game.consumeReturnToMenuRequest()) {
-                        // drop back to main menu
-                        state = UiState.MENU;
-                        game = null;                 // GC old game
-                        updateMenuHover(mouseX, mouseY); // refresh hover state in menu
-                        return; // draw menu next frame
-                    }
+                    drawMenu(g);             // <-- actually draw the panel + buttons + labels
+                    return;                  // skip game branch this frame
+                }
+                
+                // GAME
+                if (game == null) {
+                    game = new ArkanoidGame(config);
+                    game.initialize();
+                }
+                game.tick(g, dt);
+
+                if (game.consumeReturnToMenuRequest()) {
+                    state = UiState.MENU;
+                    game = null;                 // GC old game
+                    updateMenuHover(mouseX, mouseY);
+                    return;
                 }
             }
         };
@@ -146,17 +148,13 @@ public class FxLauncher extends Application {
 
 
     private void drawMenu(GraphicsContext g) {
-        // background gradient (matches in-game vibes)
-        var grad = new javafx.scene.paint.LinearGradient(
-                0, 0, 0, 1, true,
-                javafx.scene.paint.CycleMethod.NO_CYCLE,
-                new javafx.scene.paint.Stop(0, Color.web("#0f172a")),
-                new javafx.scene.paint.Stop(1, Color.web("#1e293b"))
-        );
-        g.setFill(grad);
-        g.fillRect(0, 0, WIDTH, HEIGHT);
+        g.setGlobalAlpha(1.0);     // reset any previous alpha
+        g.setEffect(null);         // reset any blur/shadow/effects
 
-        // Center panel
+        // 1) Themed background (replaces hardcoded blue/gray gradient)
+        Backgrounds.drawGameBackground(g, config.theme());
+
+        // 2) Center panel
         double panelW = sx(420);
         double panelH = sx(320);
         double x = (WIDTH - panelW) / 2.0;
@@ -169,41 +167,40 @@ public class FxLauncher extends Application {
         g.setLineWidth(1.5);
         g.strokeRoundRect(x, y, panelW, panelH, r, r);
 
-        // Title
+        // 3) Title + subtitle
         g.setFill(Color.WHITE);
         g.setFont(Font.font(30 * SCALE));
         drawCentered(g, "ARKANOID", WIDTH / 2.0, y + sx(40));
 
-        // Subtitle
         g.setFont(Font.font(14 * SCALE));
         g.setFill(Color.color(1, 1, 1, 0.75));
         drawCentered(g, "JavaFX Edition by Yoad Lotan", WIDTH / 2.0, y + sx(65));
 
-        // Buttons
+        // 4) Main buttons
         drawMenuButton(g, btnPlay, Color.web("#60a5fa"), Color.web("#3b82f6"));
         drawMenuButton(g, btnQuit, Color.web("#f97316"), Color.web("#ea580c"));
 
-        // Labels for selectors
+        // 5) Selectors (labels + buttons)
         g.setFill(Color.color(1, 1, 1, 0.85));
         g.setFont(Font.font(14 * SCALE));
         drawCentered(g, "Difficulty", btnDiff.x + btnDiff.w / 2.0, btnDiff.y - sx(8));
         drawCentered(g, "Theme",      btnTheme.x + btnTheme.w / 2.0, btnTheme.y - sx(8));
 
-        // Render small selector buttons with current values
-        drawMenuButton(g, btnDiff,  Color.web("#334155"), Color.web("#475569"));   // slate
+        drawMenuButton(g, btnDiff,  Color.web("#334155"), Color.web("#475569")); // slate
         drawMenuButton(g, btnTheme, Color.web("#334155"), Color.web("#475569"));
 
+        // 6) Current values (use new labels)
         g.setFill(Color.WHITE);
         g.setFont(Font.font(16 * SCALE));
-        drawCentered(g, config.getDifficulty().name(), btnDiff.x + btnDiff.w / 2.0,  btnDiff.y + btnDiff.h / 2.0 + sx(6));
-        drawCentered(g, config.getTheme().name(),      btnTheme.x + btnTheme.w / 2.0, btnTheme.y + btnTheme.h / 2.0 + sx(6));
+        drawCentered(g, config.difficultyLabel(), btnDiff.x + btnDiff.w / 2.0,  btnDiff.y + btnDiff.h / 2.0 + sx(6));
+        drawCentered(g, config.themeLabel(),      btnTheme.x + btnTheme.w / 2.0, btnTheme.y + btnTheme.h / 2.0 + sx(6));
 
-
-        // Footer hint
+        // 7) Footer hint
         g.setFill(Color.color(1, 1, 1, 0.6));
         g.setFont(Font.font(12 * SCALE));
         drawCentered(g, "Mouse: hover & click • ESC pauses in-game", WIDTH / 2.0, y + panelH - sx(14));
     }
+
 
     private void drawMenuButton(GraphicsContext g, MenuButton b, Color base, Color hover) {
         // Main menu uses the default styling

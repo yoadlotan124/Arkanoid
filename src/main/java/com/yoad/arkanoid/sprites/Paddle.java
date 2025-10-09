@@ -9,6 +9,13 @@ import com.yoad.arkanoid.physics.Collidable;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.LinearGradient;
+import javafx.scene.paint.Stop;
+
+
 import static com.yoad.arkanoid.game.Dimensions.*;
 
 /**
@@ -28,6 +35,8 @@ public class Paddle implements Sprite, Collidable {
 
     // Movement tuning
     private int speed = sx(6);;
+
+    private long flashUntilNs = 0L; // brief hit flash
 
     /**
      * Constructs a new sprites.Paddle object with a specified rectangle.
@@ -84,11 +93,50 @@ public class Paddle implements Sprite, Collidable {
      */
     @Override
     public void draw(GraphicsContext g) {
-        Rectangle r = this.getCollisionRectangle();
-        g.setFill(Color.WHITE);
-        g.fillRect(r.getStartX(), r.getStartY(), r.getWidth(), r.getHeight());
-        g.setStroke(Color.BLACK);
-        g.strokeRect(r.getStartX() - 1, r.getStartY() - 1, r.getWidth() + 1, r.getHeight() + 2);
+        var r = this.getCollisionRectangle();
+        double x = r.getStartX();
+        double y = r.getStartY();
+        double w = r.getWidth();
+        double h = r.getHeight();
+
+        // Capsule radius
+        double rad = Math.min(w, h) * 0.9;
+
+        // Subtle shadow under paddle
+        g.setGlobalAlpha(0.28);
+        g.setFill(Color.color(0, 0, 0, 0.55));
+        g.fillOval(x + w * 0.04, y + h * 0.65, w * 0.92, h * 0.58);
+        g.setGlobalAlpha(1.0);
+
+        // Flash brighten on recent hit (but stay in white family)
+        boolean flashing = System.nanoTime() < flashUntilNs;
+        double boost = flashing ? 1.08 : 1.0;
+
+        // White gradient: soft top → neutral → light shadowed bottom
+        Color cTop    = Color.WHITE.deriveColor(0, 1, 1.00 * boost, 1.0);
+        Color cMid    = Color.web("#f2f4f8"); // very light gray
+        Color cBottom = Color.web("#e4e7ec"); // slightly darker for depth
+
+        LinearGradient fill = new LinearGradient(
+            0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
+            new Stop(0.0, cTop),
+            new Stop(0.45, cMid),
+            new Stop(1.0, cBottom)
+        );
+
+        // Body
+        g.setFill(fill);
+        g.fillRoundRect(x, y, w, h, rad, rad);
+
+        // Crisp top highlight line
+        g.setStroke(Color.color(1, 1, 1, 0.70));
+        g.setLineWidth(Math.max(1.0, h * 0.09));
+        g.strokeLine(x + w * 0.08, y + h * 0.28, x + w * 0.92, y + h * 0.28);
+
+        // Subtle outer edge
+        g.setStroke(Color.color(0, 0, 0, 0.22));
+        g.setLineWidth(1.25);
+        g.strokeRoundRect(x + 0.5, y + 0.5, w - 1, h - 1, rad, rad);
     }
 
     /**
@@ -109,6 +157,8 @@ public class Paddle implements Sprite, Collidable {
      */
     @Override
     public Velocity hit(Ball hitter, Point collisionPoint, Velocity currentVelocity) {
+        flashUntilNs = System.nanoTime() + (long)(140e6); // ~140ms flash on contact
+
         double currentDx = currentVelocity.getDx();
         double currentDy = currentVelocity.getDy();
         double speed = Math.sqrt(currentDx * currentDx + currentDy * currentDy);
