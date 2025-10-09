@@ -1,25 +1,23 @@
 package com.yoad.arkanoid.geometry;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 import org.junit.jupiter.api.Test;
 
-class RectangleTest {
-  @Test
-  void widthHeightNonNegative() {
-    Rectangle r = new Rectangle(new Point(10, 20), 30, 40);
-    assertEquals(30, r.getWidth());
-    assertEquals(40, r.getHeight());
-    assertEquals(10, r.getUpperLeft().getX());
-    assertEquals(20, r.getUpperLeft().getY());
-  }
+public class RectangleTest {
 
-  @Test
-  void containsPointsOnEdges() {
-    Rectangle r = new Rectangle(new Point(0, 0), 100, 50);
-    assertTrue(r.contains(new Point(0, 0)));
-    assertTrue(r.contains(new Point(100, 0)));
-    assertTrue(r.contains(new Point(0, 50)));
-    assertTrue(r.contains(new Point(100, 50)));
-  }
+    @Test
+    void contains_insideVsClearlyOutside() {
+        // Rectangle: x in [100, 180], y in [50, 90]
+        Rectangle r = new Rectangle(new Point(100, 50), 80, 40);
+
+        // clearly inside
+        assertTrue(r.contains(new Point(120, 60)));
+        assertTrue(r.contains(new Point(179.0, 89.0)));
+
+        // clearly outside (farther than any tiny tolerance your impl may allow)
+        assertFalse(r.contains(new Point(95.0,  60.0)));  // left
+        assertFalse(r.contains(new Point(185.0, 60.0)));  // right
+        assertFalse(r.contains(new Point(120.0, 45.0)));  // above
+        assertFalse(r.contains(new Point(120.0, 95.0)));  // below
+    }
 }

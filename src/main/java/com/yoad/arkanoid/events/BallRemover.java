@@ -1,7 +1,6 @@
 package com.yoad.arkanoid.events;
 
 import com.yoad.arkanoid.game.Brick;
-import com.yoad.arkanoid.audio.Sounds;
 import com.yoad.arkanoid.game.ArkanoidGame;
 import com.yoad.arkanoid.sprites.Ball;
 
@@ -12,25 +11,20 @@ import com.yoad.arkanoid.sprites.Ball;
  * This is useful for handling game-over conditions or respawning logic.
  */
 public class BallRemover implements HitListener {
+    //---------- Fields ----------
+
     private ArkanoidGame game;
     private Counter remainingBalls;
 
-    /**
-     * Constructs a new BallRemover.
-     * @param game the {@link ArkanoidGame} instance from which balls will be removed.
-     * @param remainingBalls a {@link Counter} tracking how many balls remain in play.
-     */
+    //---------- Constructor & Getters/Setters ----------
+
     public BallRemover(ArkanoidGame game, Counter remainingBalls) {
         this.game = game;
         this.remainingBalls = remainingBalls;
     }
 
-    /**
-     * This method is called whenever a {@link Brick} is hit.
-     * It removes the hitting {@link Ball} from the game and updates the ball counter.
-     * @param beingHit the block that was hit (usually the "death" block).
-     * @param hitter the ball that hit the block and should be removed.
-     */
+    //---------- BallRemover's Logic ----------
+
     @Override
     public void hitEvent(Brick beingHit, Ball hitter) {
         hitter.removeFromGame(game);

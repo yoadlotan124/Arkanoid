@@ -2,15 +2,20 @@ package com.yoad.arkanoid.powerups;
 
 import com.yoad.arkanoid.sprites.Sprite;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
 import static com.yoad.arkanoid.game.Dimensions.*;
 
-/** A falling pickup the paddle can catch. */
+/** 
+ * A falling pickup the paddle can catch.
+ */
 public final class PowerUp implements Sprite {
+    //---------- Fields ----------
+
     public final PowerUpType type;
     private double x, y;               // top-left
     private final int w, h;            // size
+
+    //---------- Constructor & Getters/Setters ----------
 
     public PowerUp(PowerUpType type, double x, double y) {
         this.type = type;
@@ -19,16 +24,27 @@ public final class PowerUp implements Sprite {
         this.h = sx(24);
     }
 
+    public double getX() { return x; }
+    public double getY() { return y; }
+    public int getW() { return w; }
+    public int getH() { return h; }
+
     /** Move down by pixels per second, scaled by dt. */
     public void update(double dt) {
         y += sd(140.0) * dt; // fall speed ~140px/s scaled
     }
 
-    @Override public void timePassed() { /* we drive with dt in game loop */ }
+    //---------- PowerUps Logic ----------
+
+    @Override
+    public void timePassed() {
+        // In game loop.
+    }
 
     @Override
     public void draw(GraphicsContext g) {
         double r = sx(12);
+        
         // base pill
         switch (type) {
             case EXPAND_PADDLE -> {
@@ -74,9 +90,4 @@ public final class PowerUp implements Sprite {
             }
         }
     }
-
-    public double x() { return x; }
-    public double y() { return y; }
-    public int w() { return w; }
-    public int h() { return h; }
 }

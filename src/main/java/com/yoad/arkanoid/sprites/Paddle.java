@@ -9,8 +9,6 @@ import com.yoad.arkanoid.physics.Collidable;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
@@ -26,6 +24,7 @@ import static com.yoad.arkanoid.game.Dimensions.*;
  * The paddle is a rectangular object, and its behavior is dependent on the region where the ball hits it.
  */
 public class Paddle implements Sprite, Collidable {
+    //---------- Fields ----------
 
     private Rectangle rectangle;
 
@@ -35,41 +34,37 @@ public class Paddle implements Sprite, Collidable {
 
     // Movement tuning
     private int speed = sx(6);;
-
     private long flashUntilNs = 0L; // brief hit flash
 
-    /**
-     * Constructs a new sprites.Paddle object with a specified rectangle.
-     * @param rectangle The rectangle that represents the paddle's shape and size.
-     * @param keyboard
-     */
+    //---------- Constructor & Getters/Setters ----------
+
     public Paddle(Rectangle rectangle) { this.rectangle = rectangle; }
 
-    /**
-     * Getters and setters
-     */
     public int getSpeed() { return speed; }
     public void setSpeed(int speed) { this.speed = Math.max(1, speed); }
 
-    /** Let the game feed input state each frame (e.g., from JavaFX key handlers). */
+    @Override
+    public Rectangle getCollisionRectangle() { return rectangle; }
+
+    public void addToGame(ArkanoidGame g) {
+        g.addSprite(this    );
+        g.addCollidable(this);
+    }
+
+    //---------- Paddle Logic ----------
+
+    /** Let the game feed input state each frame */
     public void setInput(boolean left, boolean right) {
         this.leftPressed = left;
         this.rightPressed = right;
     }
 
-    /**
-     * Moves the paddle to the left by 5 units.
-     */
     public void moveLeft() {
         rectangle.move(-speed);
         if (rectangle.getStartX() <= -sx(50)) {
             rectangle.move(sx(862)); // 862 * 1.5 preserves prior wrap behavior
         }
     }
-
-    /**
-     * Moves the paddle to the right by 5 units.
-     */
     public void moveRight() {
         rectangle.move(speed);
         if (rectangle.getStartX() >= sx(760)) {
@@ -77,10 +72,6 @@ public class Paddle implements Sprite, Collidable {
         }
     }
 
-    /**
-     * This method is called when time has passed. It checks for key presses
-     * and moves the paddle left or right accordingly.
-     */
     @Override
     public void timePassed() {
         if (leftPressed)  moveLeft();
@@ -88,69 +79,11 @@ public class Paddle implements Sprite, Collidable {
     }
 
     /**
-     * Draws the paddle on the given draw surface.
-     * @param surface The surface to draw on.
-     */
-    @Override
-    public void draw(GraphicsContext g) {
-        var r = this.getCollisionRectangle();
-        double x = r.getStartX();
-        double y = r.getStartY();
-        double w = r.getWidth();
-        double h = r.getHeight();
-
-        // Capsule radius
-        double rad = Math.min(w, h) * 0.9;
-
-        // Subtle shadow under paddle
-        g.setGlobalAlpha(0.28);
-        g.setFill(Color.color(0, 0, 0, 0.55));
-        g.fillOval(x + w * 0.04, y + h * 0.65, w * 0.92, h * 0.58);
-        g.setGlobalAlpha(1.0);
-
-        // Flash brighten on recent hit (but stay in white family)
-        boolean flashing = System.nanoTime() < flashUntilNs;
-        double boost = flashing ? 1.08 : 1.0;
-
-        // White gradient: soft top → neutral → light shadowed bottom
-        Color cTop    = Color.WHITE.deriveColor(0, 1, 1.00 * boost, 1.0);
-        Color cMid    = Color.web("#f2f4f8"); // very light gray
-        Color cBottom = Color.web("#e4e7ec"); // slightly darker for depth
-
-        LinearGradient fill = new LinearGradient(
-            0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
-            new Stop(0.0, cTop),
-            new Stop(0.45, cMid),
-            new Stop(1.0, cBottom)
-        );
-
-        // Body
-        g.setFill(fill);
-        g.fillRoundRect(x, y, w, h, rad, rad);
-
-        // Crisp top highlight line
-        g.setStroke(Color.color(1, 1, 1, 0.70));
-        g.setLineWidth(Math.max(1.0, h * 0.09));
-        g.strokeLine(x + w * 0.08, y + h * 0.28, x + w * 0.92, y + h * 0.28);
-
-        // Subtle outer edge
-        g.setStroke(Color.color(0, 0, 0, 0.22));
-        g.setLineWidth(1.25);
-        g.strokeRoundRect(x + 0.5, y + 0.5, w - 1, h - 1, rad, rad);
-    }
-
-    /**
-     * Returns the rectangle that defines the collision boundaries of the paddle.
-     * @return The rectangle representing the paddle's collision boundaries.
-     */
-    @Override
-    public Rectangle getCollisionRectangle() { return rectangle; }
-
-    /**
      * Handles the collision of the ball with the paddle. The ball's velocity changes
      * based on the region of the paddle where the collision occurs.
      * The paddle is divided into five regions, and the ball's velocity is altered based
      * on which region it hits. The velocity of the ball is reflected or modified accordingly.
+     * @param hitter the object that hit the paddle.
      * @param collisionPoint The point where the ball collided with the paddle.
      * @param currentVelocity The current velocity of the ball before the collision.
      * @return The new velocity of the ball after the collision.
@@ -201,17 +134,57 @@ public class Paddle implements Sprite, Collidable {
         return new Velocity(currentDx, -currentDy);
     }
 
-    /**
-     * Adds this paddle to the given game by adding it to both the sprite collection
-     * and the collidable collection.
-     * @param g The game to add this paddle to.
-     */
-    public void addToGame(ArkanoidGame g) {
-        g.addSprite(this    );
-        g.addCollidable(this);
+    //---------- Graphics ----------
+
+    @Override
+    public void draw(GraphicsContext g) {
+        var r = this.getCollisionRectangle();
+        double x = r.getStartX();
+        double y = r.getStartY();
+        double w = r.getWidth();
+        double h = r.getHeight();
+
+        // Capsule radius
+        double rad = Math.min(w, h) * 0.9;
+
+        // Subtle shadow under paddle
+        g.setGlobalAlpha(0.28);
+        g.setFill(Color.color(0, 0, 0, 0.55));
+        g.fillOval(x + w * 0.04, y + h * 0.65, w * 0.92, h * 0.58);
+        g.setGlobalAlpha(1.0);
+
+        // Flash brighten on recent hit
+        boolean flashing = System.nanoTime() < flashUntilNs;
+        double boost = flashing ? 1.08 : 1.0;
+
+        // White gradient: soft top -> neutral -> light shadowed bottom
+        Color cTop    = Color.WHITE.deriveColor(0, 1, 1.00 * boost, 1.0);
+        Color cMid    = Color.web("#f2f4f8"); // very light gray
+        Color cBottom = Color.web("#e4e7ec"); // slightly darker for depth
+
+        LinearGradient fill = new LinearGradient(
+            0, 0, 0, 1, true, CycleMethod.NO_CYCLE,
+            new Stop(0.0, cTop),
+            new Stop(0.45, cMid),
+            new Stop(1.0, cBottom)
+        );
+
+        // Body
+        g.setFill(fill);
+        g.fillRoundRect(x, y, w, h, rad, rad);
+
+        // Crisp top highlight line
+        g.setStroke(Color.color(1, 1, 1, 0.70));
+        g.setLineWidth(Math.max(1.0, h * 0.09));
+        g.strokeLine(x + w * 0.08, y + h * 0.28, x + w * 0.92, y + h * 0.28);
+
+        // Subtle outer edge
+        g.setStroke(Color.color(0, 0, 0, 0.22));
+        g.setLineWidth(1.25);
+        g.strokeRoundRect(x + 0.5, y + 0.5, w - 1, h - 1, rad, rad);
     }
 
-    //-----PowerUps-----
+    //---------- Power Ups ----------
 
     public void scaleWidth(double factor) {
         int target = (int)Math.round(this.rectangle.getWidth() * factor);

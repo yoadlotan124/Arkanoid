@@ -6,21 +6,19 @@ import com.yoad.arkanoid.sprites.Ball;
 /**
  * A {@code ScoreTrackingListener} is a {@link HitListener} that increases the score
  * whenever a block is hit.
- *
- * <p>Each time a hit occurs, this listener increases the score by 5 points.
- * It is typically used to track the player's score during gameplay.</p>
  */
 public class ScoreTrackingListener implements HitListener {
+    //---------- Fields ----------
+
     private Counter currentScore;
 
-    /**
-     * Constructs a ScoreTrackingListener with a reference to the score counter.
-     *
-     * @param scoreCounter the counter that keeps track of the current score
-     */
+    //---------- Constructor & Getters/Setters ----------
+
     public ScoreTrackingListener(Counter scoreCounter) {
         this.currentScore = scoreCounter;
     }
+
+    //---------- Logic ----------
 
     /**
      * Called when a hit occurs. Increases the score by 5.

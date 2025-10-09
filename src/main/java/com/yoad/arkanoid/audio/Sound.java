@@ -3,9 +3,13 @@ package com.yoad.arkanoid.audio;
 import javafx.scene.media.AudioClip;
 
 public final class Sound {
+    //---------- Fields ----------
+
     private final AudioClip clip;
     private final double minGapNs; // rate-limit window
     private long lastPlayNs = 0L;
+
+    //---------- Constructor & Getters/Setters ----------
 
     public Sound(String resourcePath, double volume) {
         this(resourcePath, volume, 0.0);
@@ -25,6 +29,8 @@ public final class Sound {
         // warm-up (avoid first-play delay)
         if (this.clip != null) this.clip.play(0.0); // inaudible pre-load
     }
+
+    //---------- Sound's Logic ----------
 
     /** Play if not rate-limited. */
     public void play() {

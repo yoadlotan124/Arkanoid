@@ -20,12 +20,12 @@ public class MenuButton {
         return px >= x && px <= x + w && py >= y && py <= y + h;
     }
 
-    /** Default styled draw (good for main menu). */
+    /** Default styled draw */
     public void draw(GraphicsContext g, Color base, Color hover) {
         draw(g, base, hover, 20 * SCALE, sx(12));
     }
 
-    /** Customizable draw (use for pause menu differences). */
+    /** Customizable draw */
     public void draw(GraphicsContext g, Color base, Color hover, double fontPx, double cornerRadius) {
         Color fill = hovered ? hover : base;
         g.setFill(fill);
