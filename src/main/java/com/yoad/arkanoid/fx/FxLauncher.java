@@ -33,6 +33,8 @@ public class FxLauncher extends Application {
         // Hook up keyboard (minimal: left/right/space/esc/enter)
         scene.setOnKeyPressed(e -> game.onKeyChanged(e.getCode(), true));
         scene.setOnKeyReleased(e -> game.onKeyChanged(e.getCode(), false));
+        scene.setOnMouseMoved(e  -> game.onMouseMoved(e.getX(), e.getY()));
+        scene.setOnMouseClicked(e-> game.onMouseClicked(e.getX(), e.getY()));
 
         // FX game loop: call the game's per-frame function
         AnimationTimer timer = new AnimationTimer() {

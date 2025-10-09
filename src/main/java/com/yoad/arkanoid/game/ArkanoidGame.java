@@ -14,6 +14,7 @@ import com.yoad.arkanoid.sprites.Sprite;
 import com.yoad.arkanoid.sprites.SpriteCollection;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.MenuButton;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -42,6 +43,13 @@ public class ArkanoidGame {
     private volatile boolean keyEsc   = false; // kept for future use
     private volatile boolean keyEnter = false; // kept for future/menu use
 
+    // Pause state
+    private boolean paused = false;
+
+    // Pause menu buttons
+    private MenuButton btnResume, btnRestart, btnQuit;
+    private double mouseX = -1, mouseY = -1; // for hover
+
     // Game accounting
     private final Counter blockCounter = new Counter();
     private final Counter ballCounter  = new Counter();
@@ -54,6 +62,42 @@ public class ArkanoidGame {
     // End state
     private boolean finished = false;
     private String endMessage = "";
+
+    
+    //Button helper class
+    private static final class MenuButton {
+        double x, y, w, h;
+        String label;
+        boolean hovered = false;
+
+        MenuButton(String label, double x, double y, double w, double h) {
+            this.label = label; this.x = x; this.y = y; this.w = w; this.h = h;
+        }
+
+        boolean contains(double px, double py) {
+            return px >= x && px <= x + w && py >= y && py <= y + h;
+        }
+    }
+
+    /**
+     * creates pause buttons during menu pullup
+     */
+    private void createPauseButtons() {
+        double panelW = sx(360);
+        double panelH = sx(260);
+        double panelX = (WIDTH - panelW) / 2.0;
+        double panelY = (HEIGHT - panelH) / 2.0;
+
+        double btnW = panelW - sx(60);
+        double btnH = sx(44);
+        double x = panelX + sx(30);
+        double y0 = panelY + sx(70);
+        double gap = sx(14);
+
+        btnResume = new MenuButton("Resume", x, y0, btnW, btnH);
+        btnRestart = new MenuButton("Restart", x, y0 + btnH + gap, btnW, btnH);
+        btnQuit = new MenuButton("Quit", x, y0 + 2*(btnH+gap),btnW, btnH);
+    }
 
     /**
      * Initializes the game by setting up the graphical user interface (GUI),
@@ -120,6 +164,8 @@ public class ArkanoidGame {
         Brick bottomWall = new Brick(new Rectangle(new Point(sx(28), HEIGHT), WIDTH - sx(56), sx(28)), java.awt.Color.GRAY);
         bottomWall.addHitListener(ballRemover);
         bottomWall.addToGame(this);
+
+        createPauseButtons();
     }
 
     // ---------------- Input from JavaFX ----------------
@@ -128,13 +174,29 @@ public class ArkanoidGame {
     public void onKeyChanged(KeyCode code, boolean down) {
         if (code == null) return;
         switch (code) {
-            case LEFT, A   -> keyLeft  = down;
-            case RIGHT, D  -> keyRight = down;
-            case SPACE     -> keySpace = down;
-            case ESCAPE    -> keyEsc   = down;
-            case ENTER     -> keyEnter = down;
+            case LEFT, A -> keyLeft = down;
+            case RIGHT, D -> keyRight = down;
+            case SPACE -> keySpace = down;
+            case ENTER -> keyEnter = down;
+            case ESCAPE -> { if (down) paused = !paused; }
             default -> { /* ignore other keys */ }
         }
+    }
+
+    public void onMouseMoved(double x, double y) {
+        mouseX = x; mouseY = y;
+        if (!paused) return;
+        // Update hover states
+        btnResume.hovered = btnResume.contains(x, y);
+        btnRestart.hovered = btnRestart.contains(x, y);
+        btnQuit.hovered = btnQuit.contains(x, y);
+    }
+
+    public void onMouseClicked(double x, double y) {
+        if (!paused) return;
+        if (btnResume.contains(x, y)) { paused = false; return; }
+        if (btnRestart.contains(x, y)) { restart(); paused = false; return; }
+        if (btnQuit.contains(x, y)) { finished = true; endMessage = "Quit\nScore: " + score.getValue(); paused = false; }
     }
 
     // ---------------- Per-frame update & render ----------------
@@ -151,35 +213,52 @@ public class ArkanoidGame {
             return;
         }
 
-        // Feed input to the paddle before updating sprites
+        // feed input to paddle each frame
         if (paddle != null) {
-            paddle.setInput(keyLeft, keyRight);
+            // when paused, disable movement
+            paddle.setInput(!paused && keyLeft, !paused && keyRight);
         }
 
-        // UPDATE
-        sprites.notifyAllTimePassed(); // your existing per-tick updates
-
-        // Check end conditions
-        if (blockCounter.getValue() <= 0) {
-            finished = true;
-            endMessage = "You Win!\nScore: " + score.getValue();
-        } else if (ballCounter.getValue() <= 0) {
-            finished = true;
-            endMessage = "Game Over\nScore: " + score.getValue();
+        // UPDATE only if not paused
+        if (!paused) {
+            sprites.notifyAllTimePassed();
+            if (blockCounter.getValue() <= 0) {
+                finished = true;
+                endMessage = "You Win!\nScore: " + score.getValue();
+            } else if (ballCounter.getValue() <= 0) {
+                finished = true;
+                endMessage = "Game Over\nScore: " + score.getValue();
+            }
         }
 
         // DRAW
         drawBackground(g);
         sprites.drawAll(g);
 
-        // (Optional) overlay debug text or HUD extensions here
+        // overlay if paused
+        if (paused) drawPauseOverlay(g);
     }
 
+    /**
+     * Background creator function
+     * @param g graphic content on which to draw the background
+     */
     private void drawBackground(GraphicsContext g) {
-        g.setFill(Color.BLUE);
+        // simple vertical gradient
+        var grad = new javafx.scene.paint.LinearGradient(
+            0, 0, 0, 1, true,
+            javafx.scene.paint.CycleMethod.NO_CYCLE,
+            new javafx.scene.paint.Stop(0, Color.web("#0f172a")), // slate-900
+            new javafx.scene.paint.Stop(1, Color.web("#1e293b"))  // slate-800
+        );
+        g.setFill(grad);
         g.fillRect(0, 0, WIDTH, HEIGHT);
     }
 
+    /**
+     * End of game overlay creator
+     * @param g graphic content on which to draw the overlay
+     */
     private void drawEndOverlay(GraphicsContext g) {
         g.setFill(Color.color(0, 0, 0, 0.55));
         g.fillRect(0, 0, WIDTH, HEIGHT);
@@ -202,6 +281,9 @@ public class ArkanoidGame {
         }
     }
 
+    /**
+     * End of game - loss/win, optional restart
+     */
     private void restart() {
         // Clear collections
         sprites.getSprites().clear();
@@ -217,6 +299,40 @@ public class ArkanoidGame {
         // Rebuild world
         initialize();
     }
+
+    /**
+     * Pause overlay creation function
+     * @param g graphics content on which to draw the pause overlay
+     */
+    private void drawPauseOverlay(GraphicsContext g) {
+        // dim the world
+        g.setFill(Color.color(0, 0, 0, 0.45));
+        g.fillRect(0, 0, WIDTH, HEIGHT);
+
+        double panelW = sx(360);
+        double panelH = sx(260);
+        double x = (WIDTH - panelW) / 2.0;
+        double y = (HEIGHT - panelH) / 2.0;
+        double r = sx(16);
+
+        // panel
+        g.setFill(Color.color(0.13, 0.16, 0.22, 0.92)); // bluish glass
+        fillRoundRect(g, x, y, panelW, panelH, r);
+        g.setStroke(Color.color(1, 1, 1, 0.12));
+        g.setLineWidth(1.5);
+        strokeRoundRect(g, x, y, panelW, panelH, r);
+
+        // title
+        g.setFill(Color.WHITE);
+        g.setFont(Font.font(22 * SCALE));
+        drawCentered(g, "Paused", WIDTH / 2.0, y + sx(40));
+
+        // buttons
+        drawButton(g, btnResume,  Color.web("#22c55e"), Color.web("#16a34a")); // green
+        drawButton(g, btnRestart, Color.web("#60a5fa"), Color.web("#3b82f6")); // blue
+        drawButton(g, btnQuit,    Color.web("#f97316"), Color.web("#ea580c")); // orange
+    }
+
 
     // ---------------- Game interface (used by listeners & sprites) ----------------
 
@@ -280,5 +396,34 @@ public class ArkanoidGame {
     Text t = new Text(s);
     t.setFont(g.getFont());
     return t.getLayoutBounds().getWidth();
-}
+    }
+
+    private void drawButton(GraphicsContext g, MenuButton b, Color base, Color hover) {
+        double r = sx(10);
+        Color fill = b.hovered ? hover : base;
+        g.setFill(fill);
+        fillRoundRect(g, b.x, b.y, b.w, b.h, r);
+        g.setStroke(Color.color(1, 1, 1, 0.15));
+        g.setLineWidth(1.0);
+        strokeRoundRect(g, b.x, b.y, b.w, b.h, r);
+
+        g.setFill(Color.WHITE);
+        g.setFont(Font.font(18 * SCALE));
+        drawCentered(g, b.label, b.x + b.w / 2.0, b.y + b.h / 2.0 + sx(6));
+    }
+
+    private void fillRoundRect(GraphicsContext g, double x, double y, double w, double h, double arc) {
+        g.fillRoundRect(x, y, w, h, arc, arc);
+    }
+    private void strokeRoundRect(GraphicsContext g, double x, double y, double w, double h, double arc) {
+        g.strokeRoundRect(x, y, w, h, arc, arc);
+    }
+
+    private void drawCentered(GraphicsContext g, String text, double cx, double cy) {
+        var t = new javafx.scene.text.Text(text);
+        t.setFont(g.getFont());
+        double w = t.getLayoutBounds().getWidth();
+        g.fillText(text, cx - w / 2.0, cy);
+    }
+
 }
