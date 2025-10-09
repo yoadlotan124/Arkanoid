@@ -2,30 +2,46 @@ package com.yoad.arkanoid.fx;
 
 import javafx.scene.paint.Color;
 
+/** JavaFX color helpers (no AWT). */
 public final class FxColors {
     private FxColors() {}
 
-    public static Color fromAwt(java.awt.Color c) {
-        if (c == null) return Color.WHITE;
-        return new Color(
-            c.getRed()   / 255.0,
-            c.getGreen() / 255.0,
-            c.getBlue()  / 255.0,
-            c.getAlpha() / 255.0
+    /** From 0–255 RGB(A). */
+    public static Color rgba(int r, int g, int b, int a) {
+        return Color.rgb(
+            clamp255(r), clamp255(g), clamp255(b),
+            clamp01(a / 255.0)
         );
     }
-
-    public static javafx.scene.paint.Color toFx(java.awt.Color c) {
-        return javafx.scene.paint.Color.rgb(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha() / 255.0);
+    public static Color rgb(int r, int g, int b) {
+        return rgba(r, g, b, 255);
     }
 
-    /** Convert JavaFX -> AWT color (null-safe). */
-    public static java.awt.Color toAwt(javafx.scene.paint.Color fx) {
-        if (fx == null) return new java.awt.Color(255, 255, 255);
-        int r = (int)Math.round(fx.getRed()   * 255.0);
-        int g = (int)Math.round(fx.getGreen() * 255.0);
-        int b = (int)Math.round(fx.getBlue()  * 255.0);
-        int a = (int)Math.round(fx.getOpacity()* 255.0);
-        return new java.awt.Color(r, g, b, a);
+    /** From 0–1 doubles (already normalized). */
+    public static Color rgba(double r, double g, double b, double a) {
+        return new Color(clamp01(r), clamp01(g), clamp01(b), clamp01(a));
+    }
+
+    /** From hex strings: "#RRGGBB" or "#RRGGBBAA" (case-insensitive). */
+    public static Color hex(String hex) {
+        return Color.web(hex);
+    }
+
+    /** From packed ARGB int (0xAARRGGBB). */
+    public static Color fromArgbInt(int argb) {
+        int a = (argb >>> 24) & 0xFF;
+        int r = (argb >>> 16) & 0xFF;
+        int g = (argb >>>  8) & 0xFF;
+        int b = (argb       ) & 0xFF;
+        return rgba(r, g, b, a);
+    }
+
+    private static int clamp255(int v) {
+        return (v < 0) ? 0 : (v > 255 ? 255 : v);
+    }
+    private static double clamp01(double v) {
+        if (v < 0.0) return 0.0;
+        if (v > 1.0) return 1.0;
+        return v;
     }
 }

@@ -7,7 +7,6 @@ import com.yoad.arkanoid.geometry.Point;
 import com.yoad.arkanoid.geometry.Rectangle;
 import com.yoad.arkanoid.geometry.Velocity;
 import com.yoad.arkanoid.physics.CollisionInfo;
-import com.yoad.arkanoid.fx.FxColors;
 
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
@@ -38,19 +37,8 @@ public class Ball implements Sprite {
      *
      * @param center the center point of the ball
      * @param r      the radius of the ball
-     * @param color  the color of the ball
+     * @param fxColor  the color of the ball
      * @param environment the balls environment
-     */
-    public Ball(Point center, int r, java.awt.Color awtColor, World environment) {
-        this.center = center;
-        this.radius = r;
-        this.fxColor = FxColors.toFx(awtColor);
-        this.velocity = new Velocity(0, 0);
-        this.environment = environment;
-    }
-
-    /**
-     * Overload: Constructs a Ball with JavaFX color directly.
      */
     public Ball(Point center, int r, Color fxColor, World environment) {
         this.center = center;
@@ -85,9 +73,6 @@ public class Ball implements Sprite {
      * returns this balls color.
      * @return color.
      */
-    public java.awt.Color getColor() { return FxColors.toAwt(this.fxColor); }
-
-    /** Preferred getter for rendering/styling in JavaFX code. */
     public Color getFxColor() { return this.fxColor; }
 
     /**
@@ -204,9 +189,6 @@ public class Ball implements Sprite {
      * sets the balls color.
      * @param color to this color.
      */
-    public void setColor(java.awt.Color awt) { this.fxColor = FxColors.toFx(awt); }
-
-    /** Set color from JavaFX (preferred). */
     public void setFxColor(Color fx) { if (fx != null) this.fxColor = fx; }
 
     /**

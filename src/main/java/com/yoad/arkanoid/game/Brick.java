@@ -1,7 +1,7 @@
 package com.yoad.arkanoid.game;
 import com.yoad.arkanoid.sprites.Ball;
 
-import java.awt.Color;
+import javafx.scene.paint.Color;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +13,6 @@ import com.yoad.arkanoid.geometry.Rectangle;
 import com.yoad.arkanoid.geometry.Velocity;
 import com.yoad.arkanoid.physics.Collidable;
 import com.yoad.arkanoid.sprites.Sprite;
-import com.yoad.arkanoid.fx.FxColors;
 
 /**
  * represents a class for our game blocks that will be rectangles.
@@ -59,23 +58,19 @@ public class Brick implements Collidable, Sprite, HitNotifier {
         var r = this.getCollisionRectangle();
         double x = r.getStartX(), y = r.getStartY(), w = r.getWidth(), h = r.getHeight();
 
-        // Corner radius (nice & rounded)
         double rad = Math.min(w, h) * 0.32;
 
-        // Convert AWT -> FX
-        javafx.scene.paint.Color base = javafx.scene.paint.Color.rgb(
-            color.getRed(), color.getGreen(), color.getBlue()
-        );
-
-        // Optional: don't flash the gray walls
-        boolean isWall = (color.equals(java.awt.Color.GRAY));
+        // Optional: walls don’t flash (use FX Color.GRAY as the “wall” sentinel)
+        boolean isWall = color.equals(Color.GRAY);
 
         // Hit flash — brighten briefly
         double bright = (!isWall && System.nanoTime() < flashUntilNs) ? 1.25 : 1.0;
-        javafx.scene.paint.Color body = javafx.scene.paint.Color.color(
-            clamp01(base.getRed()   * bright),
-            clamp01(base.getGreen() * bright),
-            clamp01(base.getBlue()  * bright)
+
+        Color body = Color.color(
+            clamp01(color.getRed()   * bright),
+            clamp01(color.getGreen() * bright),
+            clamp01(color.getBlue()  * bright),
+            color.getOpacity()
         );
 
         // Fill
@@ -89,7 +84,7 @@ public class Brick implements Collidable, Sprite, HitNotifier {
         g.strokeLine(x + 3, y + 3, x + 3,        y + h * 0.65);
 
         // Subtle border
-        g.setStroke(javafx.scene.paint.Color.color(0, 0, 0, 0.35));
+        g.setStroke(Color.color(0, 0, 0, 0.35));
         g.setLineWidth(1.0);
         g.strokeRoundRect(x + 0.5, y + 0.5, w - 1, h - 1, rad, rad);
     }
@@ -185,7 +180,7 @@ public class Brick implements Collidable, Sprite, HitNotifier {
      * @return true if same color, false otherwise.
      */
     public boolean ballColorMatch(Ball ball) {
-        return this.color.equals(ball.getColor());
+        return this.color.equals(ball.getFxColor());
     }
 
     @Override

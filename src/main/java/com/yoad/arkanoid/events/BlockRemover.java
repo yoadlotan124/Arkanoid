@@ -41,7 +41,7 @@ public class BlockRemover implements HitListener {
      */
     @Override
     public void hitEvent(Brick beingHit, Ball hitter) {
-        hitter.setColor(beingHit.getColor());
+        hitter.setFxColor(beingHit.getColor());
         beingHit.removeFromGame(game);
         beingHit.removeHitListener(this);
         remainingBlocks.decrease(1);

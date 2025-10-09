@@ -129,7 +129,7 @@ public class ArkanoidGame {
 
         // Balls (good as-is)
         double s = config.ballSpeed();
-        Ball ball = new Ball(new Point(sx(200), sx(360)), sx(6), java.awt.Color.WHITE, this.environment);
+        Ball ball = new Ball(new Point(sx(200), sx(360)), sx(6), Color.WHITE, this.environment);
         ball.setVelocity(s, -s);
         ball.addToGame(this);
         ballCounter.increase(1);
@@ -159,7 +159,7 @@ public class ArkanoidGame {
                     (int)(current.getBlue()  * 255)
                 );
 
-                Brick block = new Brick(new Rectangle(new Point(x, y), blockWidth, blockHeight), awt);
+                Brick block = new Brick(new Rectangle(new Point(x, y), blockWidth, blockHeight), current);
                 block.addToGame(this);
                 blockCounter.increase(1);
                 block.addHitListener(blockRemover);
@@ -171,10 +171,10 @@ public class ArkanoidGame {
         // Walls placed just outside the visible canvas (still collidable)
         int t = sx(28); // wall thickness
 
-        Brick topWall    = new Brick(new Rectangle(new Point(0,   -t),    WIDTH, t), java.awt.Color.GRAY);
-        Brick leftWall   = new Brick(new Rectangle(new Point(-t,   0),     t,     HEIGHT), java.awt.Color.GRAY);
-        Brick rightWall  = new Brick(new Rectangle(new Point(WIDTH, 0),     t,     HEIGHT), java.awt.Color.GRAY);
-        Brick bottomWall = new Brick(new Rectangle(new Point(0,    HEIGHT), WIDTH, t), java.awt.Color.GRAY);
+        Brick topWall    = new Brick(new Rectangle(new Point(0,   -t),    WIDTH, t), Color.GRAY);
+        Brick leftWall   = new Brick(new Rectangle(new Point(-t,   0),     t,     HEIGHT), Color.GRAY);
+        Brick rightWall  = new Brick(new Rectangle(new Point(WIDTH, 0),     t,     HEIGHT), Color.GRAY);
+        Brick bottomWall = new Brick(new Rectangle(new Point(0,    HEIGHT), WIDTH, t), Color.GRAY);
         bottomWall.addHitListener(ballRemover);
 
         topWall.addToGame(this);
@@ -559,7 +559,7 @@ public class ArkanoidGame {
                     Ball nb = new Ball(
                         new Point(b.getX() + ox, b.getY() + oy),
                         b.getSize(),
-                        b.getColor(),
+                        b.getFxColor(),
                         this.environment
                     );
                     nb.setVelocity(dx, dy);     // EXACTLY like your initial spawn (±s, -s)
