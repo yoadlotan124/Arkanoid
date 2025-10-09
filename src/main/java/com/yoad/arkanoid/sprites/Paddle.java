@@ -94,7 +94,7 @@ public class Paddle implements Sprite, Collidable {
 
         double currentDx = currentVelocity.getDx();
         double currentDy = currentVelocity.getDy();
-        // double speed = Math.sqrt(currentDx * currentDx + currentDy * currentDy);
+        double speed = Math.sqrt(currentDx * currentDx + currentDy * currentDy);
 
         int paddleWidth   =               rectangle.getWidth();
         int paddleLeftX   =              rectangle.getStartX();
@@ -106,47 +106,32 @@ public class Paddle implements Sprite, Collidable {
             return new Velocity(currentDx, Math.abs(currentDy)); // Force downward bounce
         }
 
-        // // If collision is from ABOVE (normal case)
-        // if (collisionPoint.getY() < paddleTopY) {
-        //     // Divide paddle into 5 regions for better edge control
-        //     double regionSize = paddleWidth / 5.0;
+        // If collision is from ABOVE (normal case)
+        if (collisionPoint.getY() < paddleTopY) {
+            // Divide paddle into 5 regions for better edge control
+            double regionSize = paddleWidth / 5.0;
 
-        //     if (collisionPoint.getX() <= paddleLeftX + regionSize) {
-        //         return Velocity.fromAngleAndSpeed(300, speed); // Far left: sharp angle
-        //     } else if (collisionPoint.getX() <= paddleLeftX + 2 * regionSize) {
-        //         return Velocity.fromAngleAndSpeed(330, speed); // Left-middle: moderate angle
-        //     } else if (collisionPoint.getX() <= paddleLeftX + 3 * regionSize) {
-        //         return new Velocity(currentDx, -currentDy); // Center: straight up
-        //     } else if (collisionPoint.getX() <= paddleLeftX + 4 * regionSize) {
-        //         return Velocity.fromAngleAndSpeed(30, speed); // Right-middle: moderate angle
-        //     } else {
-        //         return Velocity.fromAngleAndSpeed(60, speed); // Far right: sharp angle
-        //     }
-        // }
-        double regionSize = paddleWidth / 5.0;
-        double relX = collisionPoint.getX() - paddleLeftX;
-        double speed = Math.hypot(currentDx, currentDy);
-
-        if (relX <= regionSize) {
-            return Velocity.fromAngleAndSpeed(150, speed);  // far left: sharp up-left
-        } else if (relX <= 2 * regionSize) {
-            return Velocity.fromAngleAndSpeed(120, speed);  // left-mid: moderate up-left
-        } else if (relX <= 3 * regionSize) {
-            return Velocity.fromAngleAndSpeed(90,  speed);  // center: straight up
-        } else if (relX <= 4 * regionSize) {
-            return Velocity.fromAngleAndSpeed(60,  speed);  // right-mid: moderate up-right
-        } else {
-            return Velocity.fromAngleAndSpeed(30,  speed);  // far right: sharp up-right
+            if (collisionPoint.getX() <= paddleLeftX + regionSize) {
+                return Velocity.fromAngleAndSpeed(300, speed); // Far left: sharp angle
+            } else if (collisionPoint.getX() <= paddleLeftX + 2 * regionSize) {
+                return Velocity.fromAngleAndSpeed(330, speed); // Left-middle: moderate angle
+            } else if (collisionPoint.getX() <= paddleLeftX + 3 * regionSize) {
+                return new Velocity(currentDx, -currentDy); // Center: straight up
+            } else if (collisionPoint.getX() <= paddleLeftX + 4 * regionSize) {
+                return Velocity.fromAngleAndSpeed(30, speed); // Right-middle: moderate angle
+            } else {
+                return Velocity.fromAngleAndSpeed(60, speed); // Far right: sharp angle
+            }
         }
 
-        // // If collision is from the SIDE (e.g., paddle moving into the ball)
-        // if ((collisionPoint.getX() <= paddleLeftX || collisionPoint.getX() >= paddleLeftX + paddleWidth)
-        //         && (collisionPoint.getY() >= paddleTopY && collisionPoint.getY() <= paddleBottomY)) {
-        //     return new Velocity(-currentDx, currentDy); // True side hit
-        // }
+        // If collision is from the SIDE (e.g., paddle moving into the ball)
+        if ((collisionPoint.getX() <= paddleLeftX || collisionPoint.getX() >= paddleLeftX + paddleWidth)
+                && (collisionPoint.getY() >= paddleTopY && collisionPoint.getY() <= paddleBottomY)) {
+            return new Velocity(-currentDx, currentDy); // True side hit
+        }
 
-        // // Default: bounce upward (shouldn't normally reach here)
-        // return new Velocity(currentDx, -currentDy);
+        // Default: bounce upward (shouldn't normally reach here)
+        return new Velocity(currentDx, -currentDy);
     }
 
     //---------- Graphics ----------
