@@ -16,6 +16,9 @@ import javafx.stage.Stage;
 import com.yoad.arkanoid.game.GameConfig;
 import com.yoad.arkanoid.ui.MenuButton;
 import static com.yoad.arkanoid.ui.UIUtils.drawCentered;
+
+import com.yoad.arkanoid.audio.Sounds;
+
 import static com.yoad.arkanoid.game.Dimensions.*;
 
 
@@ -39,6 +42,10 @@ public class FxLauncher extends Application {
 
     private long lastNs = 0;
 
+    // fields in FxLauncher (top of class)
+    private long lastPressNs = 0;
+    private static final long CLICK_DEBOUNCE_NS = 180_000_000L; // 180ms
+
     @Override
     public void start(Stage stage) {
         canvas = new Canvas(WIDTH, HEIGHT);
@@ -60,6 +67,20 @@ public class FxLauncher extends Application {
             if (state == UiState.MENU) handleMenuClick(e.getX(), e.getY());
             else if (state == UiState.GAME && game != null) game.onMouseClicked(e.getX(), e.getY());
         });
+        
+        // #Not working for now
+
+        // scene.setOnMousePressed(e -> {
+        //     double x = e.getX(), y = e.getY();
+        //     if (state == UiState.MENU) {
+        //         // play first so sound is not lost if state changes
+        //         Sounds.CLICK.play();
+        //         handleMenuClick(x, y);  // your existing method
+        //     } else if (state == UiState.GAME && game != null) {
+        //         // if you have pause-menu buttons, you can route here too
+        //         Sounds.CLICK.play();
+        //     }
+        // });
         scene.setOnKeyPressed(e -> {
             if (state == UiState.GAME && game != null) game.onKeyChanged(e.getCode(), true);
         });

@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.yoad.arkanoid.audio.Sounds;
 import com.yoad.arkanoid.events.HitListener;
 import com.yoad.arkanoid.events.HitNotifier;
 import com.yoad.arkanoid.geometry.Point;

@@ -1,5 +1,6 @@
 package com.yoad.arkanoid.game;
 
+import com.yoad.arkanoid.audio.Sounds;
 import com.yoad.arkanoid.events.BallRemover;
 import com.yoad.arkanoid.events.BlockRemover;
 import com.yoad.arkanoid.events.Counter;
@@ -198,9 +199,15 @@ public class ArkanoidGame {
 
     public void onMouseClicked(double x, double y) {
         if (!paused) return;
-        if (btnResume.contains(x, y))  { paused = false; return; }
-        if (btnRestart.contains(x, y)) { restart(); paused = false; return; }
-        if (btnLobby.contains(x, y))   { returnToMenuRequested = true; paused = false; return; }
+        if (btnResume.contains(x, y)) {
+            paused = false; return; 
+        }
+        if (btnRestart.contains(x, y)) {
+            restart(); paused = false; return; 
+        }
+        if (btnLobby.contains(x, y)) {
+            returnToMenuRequested = true; paused = false; return; 
+        }
     }
 
 
@@ -231,6 +238,8 @@ public class ArkanoidGame {
                 finished = true;
                 endMessage = "You Win!\nScore: " + score.getValue();
             } else if (ballCounter.getValue() <= 0) {
+                // Sound effect
+                Sounds.LOSE.play();
                 finished = true;
                 endMessage = "Game Over\nScore: " + score.getValue();
             }
@@ -512,54 +521,56 @@ public class ArkanoidGame {
     }
 
     private void applyPowerUp(PowerUpType type) {
-    switch (type) {
-        case EXPAND_PADDLE -> {
-            setPaddleWidth((int)Math.round(basePaddleWidth * 1.5));
-            effectExpiryNs.put(PowerUpType.EXPAND_PADDLE, System.nanoTime() + (long)(12e9)); // 12s
-        }
-        case PADDLE_SPEED -> {
-            paddle.setSpeed((int)Math.round(basePaddleSpeed * 1.5));
-            effectExpiryNs.put(PowerUpType.PADDLE_SPEED, System.nanoTime() + (long)(10e9)); // 10s
-        }
-        case MULTI_BALL -> {
-            var balls = getBalls();
-            int cap = 8; // total balls max
-            int canAdd = Math.max(0, cap - balls.size());
-            if (canAdd <= 0) return;
+        // Sound effect
+        Sounds.POWERUP.playRestart();
+        switch (type) {
+            case EXPAND_PADDLE -> {
+                setPaddleWidth((int)Math.round(basePaddleWidth * 1.5));
+                effectExpiryNs.put(PowerUpType.EXPAND_PADDLE, System.nanoTime() + (long)(12e9)); // 12s
+            }
+            case PADDLE_SPEED -> {
+                paddle.setSpeed((int)Math.round(basePaddleSpeed * 1.5));
+                effectExpiryNs.put(PowerUpType.PADDLE_SPEED, System.nanoTime() + (long)(10e9)); // 10s
+            }
+            case MULTI_BALL -> {
+                var balls = getBalls();
+                int cap = 8; // total balls max
+                int canAdd = Math.max(0, cap - balls.size());
+                if (canAdd <= 0) return;
 
-            double s = config.ballSpeed(); // same as your first ball
-            int spawned = 0;
+                double s = config.ballSpeed(); // same as your first ball
+                int spawned = 0;
 
-            for (Ball b : balls) {
-                if (spawned >= canAdd) break;
+                for (Ball b : balls) {
+                    if (spawned >= canAdd) break;
 
-                // decide vertical sign: keep current up/down, or force up (-1.0)
-                double signY = (b.getVelocity().getDy() < 0 ? -1.0 : 1.0);
+                    // decide vertical sign: keep current up/down, or force up (-1.0)
+                    double signY = (b.getVelocity().getDy() < 0 ? -1.0 : 1.0);
 
-                double dx = +s * 0.95;
-                double dy = signY * s;
+                    double dx = +s * 0.95;
+                    double dy = signY * s;
 
-                // nudge start so it doesn’t overlap the source ball
-                double offset = b.getSize() + sx(2);
-                double ox = +offset;
-                double oy = -offset;
+                    // nudge start so it doesn’t overlap the source ball
+                    double offset = b.getSize() + sx(2);
+                    double ox = +offset;
+                    double oy = -offset;
 
-                Ball nb = new Ball(
-                    new Point(b.getX() + ox, b.getY() + oy),
-                    b.getSize(),
-                    b.getColor(),
-                    this.environment
-                );
-                nb.setVelocity(dx, dy);     // EXACTLY like your initial spawn (±s, -s)
-                nb.addToGame(this);
+                    Ball nb = new Ball(
+                        new Point(b.getX() + ox, b.getY() + oy),
+                        b.getSize(),
+                        b.getColor(),
+                        this.environment
+                    );
+                    nb.setVelocity(dx, dy);     // EXACTLY like your initial spawn (±s, -s)
+                    nb.addToGame(this);
 
-                ballCounter.increase(1);
-                spawned++;
-                if (spawned >= canAdd) break;
+                    ballCounter.increase(1);
+                    spawned++;
+                    if (spawned >= canAdd) break;
+                }
             }
         }
     }
-}
 
 
     private void setPaddleWidth(int newWidth) {

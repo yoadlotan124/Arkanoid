@@ -1,6 +1,7 @@
 package com.yoad.arkanoid.events;
 
 import com.yoad.arkanoid.game.Brick;
+import com.yoad.arkanoid.audio.Sounds;
 import com.yoad.arkanoid.game.ArkanoidGame;
 import com.yoad.arkanoid.sprites.Ball;
 
@@ -44,8 +45,10 @@ public class BlockRemover implements HitListener {
         beingHit.removeFromGame(game);
         beingHit.removeHitListener(this);
         remainingBlocks.decrease(1);
+        // Sound effect
+        Sounds.BRICK.play();
         // ~25% drop chance
-        if (rng.nextDouble() < 1) {
+        if (rng.nextDouble() < 0.25) {
             var rect = beingHit.getCollisionRectangle();
             double cx = rect.getStartX() + rect.getWidth() / 2.0;
             double cy = rect.getStartY() + rect.getHeight() / 2.0;
@@ -53,8 +56,8 @@ public class BlockRemover implements HitListener {
             // weighted choice: 40% SIZE, 20% MULTI, 40% SPEED
             double r = rng.nextDouble();
             com.yoad.arkanoid.powerups.PowerUpType type =
-                (r < 0.01) ? com.yoad.arkanoid.powerups.PowerUpType.EXPAND_PADDLE :
-                (r < 1) ? com.yoad.arkanoid.powerups.PowerUpType.MULTI_BALL :
+                (r < 0.4) ? com.yoad.arkanoid.powerups.PowerUpType.EXPAND_PADDLE :
+                (r < 0.6) ? com.yoad.arkanoid.powerups.PowerUpType.MULTI_BALL :
                             com.yoad.arkanoid.powerups.PowerUpType.PADDLE_SPEED;
 
             game.spawnPowerUp(cx, cy, type); // overload spawnPowerUp to accept a type

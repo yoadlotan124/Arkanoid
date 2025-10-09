@@ -2,9 +2,9 @@ import org.gradle.api.tasks.JavaExec
 
 plugins {
     application
-    java
     id("org.openjfx.javafxplugin") version "0.1.0"
 }
+
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -15,18 +15,18 @@ tasks.withType(JavaCompile::class) { options.release.set(17) }
 repositories { mavenCentral() }
 
 dependencies {
-    // JUnit (unchanged)
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.3")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.11.3")
+    testImplementation(platform("org.junit:junit-bom:5.10.2"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
 }
 
 javafx {
-    version = "17.0.16"          // pairs with Java 17 (LTS)
-    modules("javafx.controls", "javafx.graphics")
+    version = "21.0.5"
+    modules = listOf("javafx.controls", "javafx.graphics", "javafx.media")
 }
 
+
 application {
-    mainClass.set("com.yoad.arkanoid.App")
+    mainClass.set("com.yoad.arkanoid.App") // or FxLauncher if you prefer
 }
 
 tasks.test { 

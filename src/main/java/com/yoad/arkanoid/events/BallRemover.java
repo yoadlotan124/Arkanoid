@@ -1,6 +1,7 @@
 package com.yoad.arkanoid.events;
 
 import com.yoad.arkanoid.game.Brick;
+import com.yoad.arkanoid.audio.Sounds;
 import com.yoad.arkanoid.game.ArkanoidGame;
 import com.yoad.arkanoid.sprites.Ball;
 
