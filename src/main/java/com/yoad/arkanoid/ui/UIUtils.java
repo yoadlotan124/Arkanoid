@@ -3,6 +3,9 @@ package com.yoad.arkanoid.ui;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.text.Text;
 
+/**
+ * Class for modularity of menu buttons
+ */
 public final class UIUtils {
     private UIUtils() {}
 
