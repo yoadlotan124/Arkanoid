@@ -33,6 +33,7 @@ public class ArkanoidGame {
 
     private final SpriteCollection sprites = new SpriteCollection();
     private final World environment = new World();
+    private final GameConfig config;
 
     // Primary controllable entities
     private Paddle paddle;
@@ -64,6 +65,14 @@ public class ArkanoidGame {
     // End state
     private boolean finished = false;
     private String endMessage = "";
+
+    //constructor for game config (difficulty etc...)
+    public ArkanoidGame() {
+        this(new GameConfig());
+    }
+    public ArkanoidGame(GameConfig config) {
+        this.config = config;
+    }
 
     /**
      * creates pause buttons during menu pullup
@@ -100,31 +109,29 @@ public class ArkanoidGame {
         paddle.addToGame(this);
 
         // Balls
-        int radius = sx(6);
-        Ball ball1 = new Ball(new Point(sx(200), sx(400)), radius, java.awt.Color.WHITE, this.environment);
-        ball1.setVelocity(sd(3), sd(-3));
+        double s = config.ballSpeed();
+
+        Ball ball1 = new Ball(new Point(sx(200), sx(400)), sx(6), java.awt.Color.WHITE, this.environment);
+        ball1.setVelocity( s, -s);
         ball1.addToGame(this);
 
-        Ball ball2 = new Ball(new Point(sx(400), sx(420)), radius, java.awt.Color.WHITE, this.environment);
-        ball2.setVelocity(sd(-3), sd(-3));
+        Ball ball2 = new Ball(new Point(sx(400), sx(420)), sx(6), java.awt.Color.WHITE, this.environment);
+        ball2.setVelocity(-s, -s);
         ball2.addToGame(this);
 
-        Ball ball3 = new Ball(new Point(sx(600), sx(410)), radius, java.awt.Color.WHITE, this.environment);
-        ball3.setVelocity(sd(3), sd(-3));
+        Ball ball3 = new Ball(new Point(sx(600), sx(410)), sx(6), java.awt.Color.WHITE, this.environment);
+        ball3.setVelocity( s, -s);
         ball3.addToGame(this);
 
         ballCounter.increase(3);
 
         // Bricks (grid)
-        int blockWidth = sx(49);
+        int blockWidth  = sx(49);
         int blockHeight = sx(23);
-        int rows = 6;
-        int cols = 12;
+        int rows = config.rows();
+        int cols = config.cols();
 
-        java.awt.Color[] colors = {
-            java.awt.Color.MAGENTA, java.awt.Color.RED, java.awt.Color.YELLOW,
-            java.awt.Color.CYAN,    java.awt.Color.PINK, java.awt.Color.GREEN
-        };
+        java.awt.Color[] colors = config.getTheme().palette();
 
         for (int row = 0; row < rows; row++) {
             java.awt.Color currentColor = colors[row % colors.length];
@@ -231,12 +238,13 @@ public class ArkanoidGame {
      * @param g graphic content on which to draw the background
      */
     private void drawBackground(GraphicsContext g) {
-        // simple vertical gradient
+        var top = config.getTheme().bgTop();
+        var bot = config.getTheme().bgBottom();
         var grad = new javafx.scene.paint.LinearGradient(
             0, 0, 0, 1, true,
             javafx.scene.paint.CycleMethod.NO_CYCLE,
-            new javafx.scene.paint.Stop(0, Color.web("#0f172a")), // slate-900
-            new javafx.scene.paint.Stop(1, Color.web("#1e293b"))  // slate-800
+            new javafx.scene.paint.Stop(0, top),
+            new javafx.scene.paint.Stop(1, bot)
         );
         g.setFill(grad);
         g.fillRect(0, 0, WIDTH, HEIGHT);

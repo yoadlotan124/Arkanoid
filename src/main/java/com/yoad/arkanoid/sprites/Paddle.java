@@ -79,7 +79,7 @@ public class Paddle implements Sprite, Collidable {
     @Override
     public void draw(GraphicsContext g) {
         Rectangle r = this.getCollisionRectangle();
-        g.setFill(Color.ORANGE);
+        g.setFill(Color.WHITE);
         g.fillRect(r.getStartX(), r.getStartY(), r.getWidth(), r.getHeight());
         g.setStroke(Color.BLACK);
         g.strokeRect(r.getStartX() - 1, r.getStartY() - 1, r.getWidth() + 1, r.getHeight() + 2);
